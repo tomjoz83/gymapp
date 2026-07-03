@@ -1,0 +1,1457 @@
+{
+  "nextId": 472,
+  "workouts": [
+    {
+      "id": 313,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 1 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-07-06",
+      "created_at": "2026-07-06 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 314,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 1 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-07-07",
+      "created_at": "2026-07-07 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 315,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 316,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 317,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 318,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 319,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 320,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 1 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-07-09",
+      "created_at": "2026-07-09 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 321,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 1 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-07-10",
+      "created_at": "2026-07-10 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 322,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 323,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 324,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 325,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 326,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 2 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-07-13",
+      "created_at": "2026-07-13 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 327,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 2 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-07-14",
+      "created_at": "2026-07-14 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 328,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 329,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 330,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 331,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 332,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 333,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 2 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-07-16",
+      "created_at": "2026-07-16 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 334,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 2 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-07-17",
+      "created_at": "2026-07-17 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 335,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 336,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 337,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 338,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 339,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 3 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-07-20",
+      "created_at": "2026-07-20 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 340,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 3 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-07-21",
+      "created_at": "2026-07-21 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 341,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 342,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 343,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 344,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 345,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 346,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 3 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-07-23",
+      "created_at": "2026-07-23 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 347,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 3 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-07-24",
+      "created_at": "2026-07-24 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 348,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 349,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 350,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 351,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 352,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 4 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-07-27",
+      "created_at": "2026-07-27 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 353,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 4 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-07-28",
+      "created_at": "2026-07-28 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 354,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 355,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 356,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 357,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 358,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 359,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 4 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-07-30",
+      "created_at": "2026-07-30 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 360,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 4 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-07-31",
+      "created_at": "2026-07-31 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 361,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 362,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 363,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 364,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 365,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 5 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-08-03",
+      "created_at": "2026-08-03 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 366,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 5 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-08-04",
+      "created_at": "2026-08-04 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 367,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 368,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 369,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 370,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 371,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 372,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 5 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-08-06",
+      "created_at": "2026-08-06 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 373,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 5 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-08-07",
+      "created_at": "2026-08-07 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 374,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 375,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 376,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 377,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 378,
+      "name": "Push Day",
+      "notes": "Block 1 | Week 6 | Push Day — Chest / Shoulders / Triceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-08-10",
+      "created_at": "2026-08-10 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 379,
+      "name": "Pull Day",
+      "notes": "Block 1 | Week 6 | Pull Day — Back / Biceps. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-08-11",
+      "created_at": "2026-08-11 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 380,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 381,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 382,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 383,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 384,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 385,
+      "name": "Legs + Core",
+      "notes": "Block 1 | Week 6 | Legs + Core — Quads / Hamstrings / Core. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-08-13",
+      "created_at": "2026-08-13 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 386,
+      "name": "Upper Body Full",
+      "notes": "Block 1 | Week 6 | Upper Body Full — Full Upper Hypertrophy. Foundation phase: establish movement patterns and work capacity.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-08-14",
+      "created_at": "2026-08-14 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 387,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 388,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 389,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 390,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 391,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 7 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-08-17",
+      "created_at": "2026-08-17 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 392,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 7 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-08-18",
+      "created_at": "2026-08-18 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 393,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 394,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 395,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 396,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 397,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 398,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 7 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-08-20",
+      "created_at": "2026-08-20 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 399,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 7 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-08-21",
+      "created_at": "2026-08-21 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 400,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 401,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 402,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 403,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 404,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 8 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-08-24",
+      "created_at": "2026-08-24 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 405,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 8 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-08-25",
+      "created_at": "2026-08-25 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 406,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 407,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 408,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 409,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 410,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 411,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 8 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-08-27",
+      "created_at": "2026-08-27 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 412,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 8 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-08-28",
+      "created_at": "2026-08-28 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 413,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 414,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 415,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 416,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 417,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 9 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-08-31",
+      "created_at": "2026-08-31 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 418,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 9 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-09-01",
+      "created_at": "2026-09-01 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 419,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 420,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 421,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 422,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 423,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 424,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 9 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-09-03",
+      "created_at": "2026-09-03 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 425,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 9 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-09-04",
+      "created_at": "2026-09-04 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 426,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 427,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 428,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 429,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 430,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 10 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-09-07",
+      "created_at": "2026-09-07 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 431,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 10 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-09-08",
+      "created_at": "2026-09-08 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 432,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 433,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 434,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 435,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 436,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 437,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 10 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-09-10",
+      "created_at": "2026-09-10 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 438,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 10 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-09-11",
+      "created_at": "2026-09-11 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 439,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 440,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 441,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 442,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 443,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 11 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-09-14",
+      "created_at": "2026-09-14 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 444,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 11 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-09-15",
+      "created_at": "2026-09-15 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 445,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 446,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 447,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 448,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 449,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 450,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 11 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-09-17",
+      "created_at": "2026-09-17 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 451,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 11 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-09-18",
+      "created_at": "2026-09-18 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 452,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 453,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 454,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 455,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 456,
+      "name": "Push Day",
+      "notes": "Block 2 | Week 12 | Push Day — Chest / Shoulders / Triceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Monday",
+      "date": "2026-09-21",
+      "created_at": "2026-09-21 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 457,
+      "name": "Pull Day",
+      "notes": "Block 2 | Week 12 | Pull Day — Back / Biceps. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Tuesday",
+      "date": "2026-09-22",
+      "created_at": "2026-09-22 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 458,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 459,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 460,
+          "exercise": "Face Pulls (cable)",
+          "sets": 3,
+          "reps": 15,
+          "weight": 0
+        },
+        {
+          "id": 461,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 462,
+          "exercise": "Hammer Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    },
+    {
+      "id": 463,
+      "name": "Legs + Core",
+      "notes": "Block 2 | Week 12 | Legs + Core — Quads / Hamstrings / Core. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Thursday",
+      "date": "2026-09-24",
+      "created_at": "2026-09-24 00:00:00",
+      "completed_at": null,
+      "sets": []
+    },
+    {
+      "id": 464,
+      "name": "Upper Body Full",
+      "notes": "Block 2 | Week 12 | Upper Body Full — Full Upper Hypertrophy. Intensification phase: Increase weight 2.5-5kg. Drop rest on isolation to 45-60s.",
+      "completed": false,
+      "status": "idle",
+      "started_at": null,
+      "elapsed_seconds": 0,
+      "day": "Friday",
+      "date": "2026-09-25",
+      "created_at": "2026-09-25 00:00:00",
+      "completed_at": null,
+      "sets": [
+        {
+          "id": 465,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 466,
+          "exercise": "Incline Dumbbell Curl",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 467,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        },
+        {
+          "id": 468,
+          "exercise": "Skull Crushers",
+          "sets": 2,
+          "reps": 12,
+          "weight": 0
+        }
+      ]
+    }
+  ]
+}

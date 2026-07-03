@@ -1,0 +1,19 @@
+[Unit]
+Description=Personal Trainer web app
+After=network.target
+
+[Service]
+Type=simple
+User=tj
+Group=tj
+WorkingDirectory=/home/tj/claude/personal-trainer
+Environment=PORT=3000
+# Optional: keep data/archive outside the project dir by setting these
+# Environment=STORE_PATH=/home/tj/personal-trainer-data.json
+# Environment=ARCHIVE_PATH=/home/tj/personal-trainer-archive.json
+ExecStart=/home/tj/.local/bin/node /home/tj/claude/personal-trainer/server.js
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
