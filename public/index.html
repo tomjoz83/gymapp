@@ -8,11 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Trainer" />
   <title>Personal Trainer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Vendored locally so the app boots with no internet dependency. -->
+  <script src="vendor/vue.global.prod.js"></script>
 </head>
 <body>
   <div id="app">
@@ -29,6 +27,18 @@
     <p v-if="message" class="banner ok">{{ message }}</p>
 
     <main>
+      <!-- ===================== PASSPHRASE GATE ===================== -->
+      <section v-if="needAuth" class="card auth-gate">
+        <h3>🔒 Sign in</h3>
+        <p>Enter the passphrase for this app. It's remembered on this device.</p>
+        <p v-if="authFailed" class="banner error">That passphrase didn't work.</p>
+        <form class="row" @submit.prevent="submitToken">
+          <input v-model="tokenInput" type="password" placeholder="Passphrase" autocomplete="current-password" />
+          <button type="submit">Unlock</button>
+        </form>
+      </section>
+
+      <template v-else>
       <!-- ===================== OVERVIEW ===================== -->
       <section v-show="view === 'overview'">
         <form class="card row" @submit.prevent="createWorkout">
@@ -37,13 +47,12 @@
           <button type="submit">Add workout</button>
         </form>
         <div class="overview-header">
-          <button class="ghost small" @click="toggleWeekPanel">{{ weekPanelOpen ? 'Hide week' : 'Show week' }}</button>
-          <div class="week-title">{{ weekLabel }}</div>
+          <button class="ghost small" @click="changeWeek(-1)">← Prev</button>
+          <div class="week-title">
+            {{ weekLabel }}
+            <button v-if="weekOffset !== 0" class="ghost small today-btn" @click="goThisWeek">This week</button>
+          </div>
           <button class="ghost small" @click="changeWeek(1)">Next →</button>
-        </div>
-        <div class="week-panel" v-show="weekPanelOpen">
-          <button class="ghost small" @click="changeWeek(-1)">← Previous</button>
-          <span class="panel-hint">Use this to switch weeks.</span>
         </div>
         <div class="week-grid" v-if="week">
           <div class="day-cell" v-for="day in week.days" :key="day.date" :class="{ 'is-today': isToday(day.date) }">
@@ -176,8 +185,10 @@
               </select>
             </div>
             <div class="timer-controls">
+              <button class="small" @click="bumpRest(-15)">−15s</button>
               <button class="small success" @click="startRest">Start</button>
               <button class="small" @click="pauseRest">Pause</button>
+              <button class="small" @click="bumpRest(15)">+15s</button>
               <button class="small danger" @click="resetRest">Reset</button>
             </div>
           </div>
@@ -186,37 +197,35 @@
 
       <!-- ===================== PROGRESS ===================== -->
       <section v-show="view === 'progress'">
-        <p v-if="!progress" class="empty">Add workouts to see per-workout progress here.</p>
+        <p v-if="!progress" class="empty">Loading progress…</p>
+        <p v-else-if="!progress.length" class="empty">Log some sets to see your progress per exercise here.</p>
         <div v-else class="workout-list">
-          <div v-for="w in progress" :key="w.id" class="card workout" :class="{ done: w.completed }">
+          <div v-for="ex in progress" :key="ex.key" class="card exercise-progress">
             <div class="workout-head">
               <div class="title">
-                <h3>
-                  <span class="check">{{ w.completed ? '✅' : '⬜' }}</span>
-                  {{ w.name }}
-                </h3>
-                <small v-if="w.notes">{{ w.notes }}</small>
-                <small class="muted" v-if="w.set_count">{{ w.date || 'unscheduled' }} · {{ w.set_count }} sets · volume {{ w.volume }}</small>
-                <small class="muted" v-else>{{ w.date || 'unscheduled' }} · volume {{ w.volume }}</small>
+                <h3>{{ ex.name }}</h3>
+                <small class="muted">
+                  {{ ex.sessionCount }} session{{ ex.sessionCount === 1 ? '' : 's' }}
+                  · top {{ ex.topWeight }} · last {{ formatDate(ex.lastDate) }}
+                </small>
               </div>
-              <div class="actions">
-                <button class="small" @click="toggleComplete(w)">{{ w.completed ? 'Reopen' : 'Complete' }}</button>
-                <button class="small danger" @click="deleteWorkout(w)">Delete</button>
-              </div>
+              <svg v-if="ex.spark" class="spark" :viewBox="'0 0 ' + ex.spark.w + ' ' + ex.spark.h" preserveAspectRatio="none">
+                <polyline v-if="!ex.spark.single" :points="ex.spark.points" fill="none" />
+                <circle :cx="ex.spark.lastX" :cy="ex.spark.lastY" r="3" />
+              </svg>
             </div>
 
-            <div class="table-wrap" v-if="w.sets.length">
+            <div class="table-wrap">
             <table class="sets">
               <thead>
-                <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>RPE</th><th>Weight</th></tr>
+                <tr><th>Date</th><th>Sets logged</th><th>Top wt</th><th>Volume</th></tr>
               </thead>
               <tbody>
-                <tr v-for="s in w.sets" :key="s.id">
-                  <td>{{ s.exercise }}</td>
-                  <td>{{ s.sets || 1 }}</td>
-                  <td>{{ s.reps }}</td>
-                  <td>{{ s.rpe ? '@' + s.rpe : '—' }}</td>
-                  <td>{{ s.weight }}</td>
+                <tr v-for="s in ex.sessions" :key="s.date">
+                  <td class="nowrap">{{ formatDate(s.date) }}</td>
+                  <td>{{ s.summary }}</td>
+                  <td>{{ s.topWeight }}</td>
+                  <td>{{ s.volume }}</td>
                 </tr>
               </tbody>
             </table>
@@ -230,7 +239,7 @@
         <div class="card">
           <h3>Export</h3>
           <p>Download every workout and set as a CSV file.</p>
-          <a class="btn" href="/api/export.csv">Download workouts.csv</a>
+          <a class="btn" :href="'/api/export.csv?token=' + encodeURIComponent(authToken)">Download workouts.csv</a>
           <a class="btn ghost" href="/workouts-template.csv" download>Get CSV template</a>
         </div>
 
@@ -253,7 +262,7 @@
           <p>Completed workouts saved to a separate file: <strong>{{ archiveCount }}</strong>.
              These are kept safe and are <em>not</em> removed when you clear or replace your plan.</p>
           <button class="ghost" @click="archiveCompleted">Archive completed now</button>
-          <a class="btn ghost" href="/api/archive.csv">Download archive CSV</a>
+          <a class="btn ghost" :href="'/api/archive.csv?token=' + encodeURIComponent(authToken)">Download archive CSV</a>
         </div>
 
         <div class="card">
@@ -263,6 +272,7 @@
           <button class="danger" @click="clearAllWorkouts">Clear all workouts</button>
         </div>
       </section>
+      </template>
     </main>
   </div>
 

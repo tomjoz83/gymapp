@@ -1,12 +1,26 @@
 # 🏋️ Personal Trainer
 
 A single-user, workout-focused web app. Create workouts, log sets (reps + weight),
-mark workouts complete, see basic progress, and import/export your data as CSV.
-No login required.
+mark workouts complete, track per-exercise progress, and import/export your data as CSV.
+Protected by a single shared passphrase.
 
 - **Backend:** Node.js + Express + JSON file (`data.json`)
-- **Frontend:** a single-page Vue 3 app with plain CSS
-- **Storage:** a local `data.json` file created on first run
+- **Frontend:** a single-page Vue 3 app with plain CSS (Vue is vendored in
+  `public/vendor/`, so the app has **no external/CDN dependencies** and boots offline)
+- **Storage:** a local `data.json` file created on first run, saved atomically
+  (temp-file + rename) with a `.bak` kept from the previous save. A store that
+  exists but can't be parsed makes the server error loudly rather than silently
+  resetting to empty.
+
+## Access / passphrase
+
+Every `/api` route requires a token, so the app can be exposed to the internet.
+
+- On first start the server generates a random token in `.auth-token`
+  (git-ignored). Print it with `cat .auth-token`.
+- Set your own instead with the `AUTH_TOKEN` env var (takes precedence).
+- The web app asks for it once and remembers it on the device; CSV download
+  links carry it as `?token=…`.
 
 ## Run it
 
@@ -38,7 +52,7 @@ workout creation.
 - **Workouts** — create, rename/edit notes, mark complete/reopen, delete. Attach exercises with sets, reps, a prescribed RPE target, and the weight you actually used.
 - **Program import** — import a 6-week (or longer) plan from CSV. Each row is one daily workout; rest/skip days are supported.
 - **Sets** — log exercise / sets / reps / RPE / weight per workout; edit or delete any set. RPE is the prescribed effort target (1–10); weight records what you actually lifted.
-- **Progress** — a per-workout list showing each session's exercises, total set count, and total volume (`sets × reps × weight`).
+- **Progress** — grouped **by exercise** (across both the active plan and the archive): each exercise shows its session history (date, sets logged, top weight, volume) with an inline sparkline of top weight over time.
 - **CSV import/export** — download all data as `workouts.csv`, or upload a CSV to bulk-add workouts. A template is available on the Import/Export tab.
 
 ## CSV program format
@@ -81,7 +95,19 @@ Completed workouts are **always archived first** before a clear or replace, so
 changing your plan never deletes finished sessions. Download them anytime via
 **Download archive CSV**.
 
+## Running 24/7
+
+The app is kept alive by a cron watchdog (`keep-alive.sh`): a `@reboot` entry
+starts it on boot and an every-minute entry restarts it if it isn't running.
+After deploying new code, stop the current process (`pkill -f server.js`) and
+the watchdog relaunches it within a minute. A systemd unit
+(`personal-trainer.service` + `install-service.sh`) is included as an
+alternative — use one or the other, not both.
+
 ## API
+
+All `/api` routes require the token (`Authorization: Bearer <token>` header, or
+`?token=<token>` for plain download links). Requests without it get `401`.
 
 | Method | Path                           | Purpose                    |
 |--------|--------------------------------|----------------------------|

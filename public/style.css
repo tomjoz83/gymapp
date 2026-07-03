@@ -509,3 +509,31 @@ code { background: var(--panel-2); padding: 2px 6px; border-radius: 6px; font-si
 @media (max-width: 380px) {
   nav button { font-size: 0.62rem; }
 }
+
+/* ----------------------------- Auth gate ----------------------------- */
+.auth-gate {
+  max-width: 420px;
+  margin: 48px auto;
+  text-align: center;
+}
+.auth-gate form { justify-content: center; }
+
+/* "This week" jump button inside the week title */
+.today-btn { margin-left: 10px; vertical-align: middle; }
+
+/* ----------------------------- Progress sparkline ----------------------------- */
+.exercise-progress .workout-head { align-items: center; }
+.spark {
+  width: 120px;
+  height: 40px;
+  flex: none;
+  overflow: visible;
+}
+.spark polyline {
+  stroke: var(--accent-2);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.spark circle { fill: var(--accent); }

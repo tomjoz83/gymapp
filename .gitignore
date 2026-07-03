@@ -5,6 +5,13 @@ node_modules/
 *.log
 server.log
 
+# Store write artifacts (atomic-save temp + backup)
+*.json.tmp
+*.json.bak
+
+# Auth secret — never commit
+.auth-token
+
 # OS / editor cruft
 .DS_Store
 *.swp

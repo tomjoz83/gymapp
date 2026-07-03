@@ -1,6 +1,7 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const express = require('express');
 const { parseObjects, stringify } = require('./csv');
 
@@ -11,21 +12,93 @@ app.use(express.json());
 app.use(express.text({ type: ['text/csv', 'text/plain'], limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ===== Auth =====
+// Single-user shared secret. The server is reachable from the internet, so
+// every /api route requires the token — sent as `Authorization: Bearer <t>`
+// by the app, or `?token=<t>` for plain-link CSV downloads. The token lives
+// in .auth-token (auto-generated on first run, AUTH_TOKEN env overrides).
+const TOKEN_PATH = process.env.TOKEN_PATH || path.join(__dirname, '.auth-token');
+
+function loadAuthToken() {
+  if (process.env.AUTH_TOKEN) return process.env.AUTH_TOKEN.trim();
+  try {
+    const t = fs.readFileSync(TOKEN_PATH, 'utf8').trim();
+    if (t) return t;
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+  const t = crypto.randomBytes(12).toString('base64url');
+  fs.writeFileSync(TOKEN_PATH, `${t}\n`, { mode: 0o600 });
+  console.log(`Generated new auth token in ${TOKEN_PATH}`);
+  return t;
+}
+
+const AUTH_TOKEN = loadAuthToken();
+
+// Compare via hashes so lengths always match (timingSafeEqual requirement)
+// and the check is constant-time.
+function tokenMatches(candidate) {
+  const a = crypto.createHash('sha256').update(String(candidate)).digest();
+  const b = crypto.createHash('sha256').update(AUTH_TOKEN).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
+app.use('/api', (req, res, next) => {
+  const header = req.headers.authorization || '';
+  const candidate = header.startsWith('Bearer ')
+    ? header.slice(7)
+    : (req.query.token || '');
+  if (candidate && tokenMatches(candidate)) return next();
+  res.status(401).json({ error: 'unauthorized' });
+});
+
 const STORE_PATH = process.env.STORE_PATH || path.join(__dirname, 'data.json');
 
-function read() {
+// Read a JSON store file. Only a *missing* file means "fresh start" — a file
+// that exists but fails to parse is corruption, and we fail loudly rather
+// than silently resetting (which would then persist an empty store and lose
+// everything). Recover from `<file>.bak`, written before every save.
+function readJson(file, fallback) {
+  let raw;
   try {
-    const data = JSON.parse(fs.readFileSync(STORE_PATH, 'utf8'));
-    if (typeof data.nextId !== 'number') data.nextId = 1;
-    if (!Array.isArray(data.workouts)) data.workouts = [];
-    return data;
+    raw = fs.readFileSync(file, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return fallback();
+    throw err;
+  }
+  try {
+    return JSON.parse(raw);
   } catch {
-    return { nextId: 1, workouts: [] };
+    throw new Error(
+      `${path.basename(file)} exists but is not valid JSON — refusing to overwrite it. `
+      + `Restore it from ${path.basename(file)}.bak, then restart.`
+    );
   }
 }
 
+// Atomic save: write to a temp file and rename over the original, so a crash
+// mid-write can never leave a truncated store. The previous good version is
+// kept as `<file>.bak` first.
+function writeJson(file, obj) {
+  const tmp = `${file}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8');
+  try {
+    fs.copyFileSync(file, `${file}.bak`);
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err; // no previous version yet is fine
+  }
+  fs.renameSync(tmp, file);
+}
+
+function read() {
+  const data = readJson(STORE_PATH, () => ({ nextId: 1, workouts: [] }));
+  if (typeof data.nextId !== 'number') data.nextId = 1;
+  if (!Array.isArray(data.workouts)) data.workouts = [];
+  return data;
+}
+
 function write(store) {
-  fs.writeFileSync(STORE_PATH, JSON.stringify(store, null, 2), 'utf8');
+  writeJson(STORE_PATH, store);
 }
 
 // Completed workouts are copied here so they survive clearing / replacing the
@@ -33,17 +106,13 @@ function write(store) {
 const ARCHIVE_PATH = process.env.ARCHIVE_PATH || path.join(__dirname, 'archive.json');
 
 function readArchive() {
-  try {
-    const data = JSON.parse(fs.readFileSync(ARCHIVE_PATH, 'utf8'));
-    if (!Array.isArray(data.workouts)) data.workouts = [];
-    return data;
-  } catch {
-    return { workouts: [] };
-  }
+  const data = readJson(ARCHIVE_PATH, () => ({ workouts: [] }));
+  if (!Array.isArray(data.workouts)) data.workouts = [];
+  return data;
 }
 
 function writeArchive(archive) {
-  fs.writeFileSync(ARCHIVE_PATH, JSON.stringify(archive, null, 2), 'utf8');
+  writeJson(ARCHIVE_PATH, archive);
 }
 
 // Format a Date as a local YYYY-MM-DD (NOT UTC) so week boundaries and
@@ -225,11 +294,9 @@ app.post('/api/workouts', (req, res) => {
 });
 
 app.put('/api/workouts/:id', (req, res) => {
-  const workout = loadWorkout(req.params.id, read());
-  if (!workout) return res.status(404).json({ error: 'workout not found' });
-
   const store = read();
   const target = loadWorkout(req.params.id, store);
+  if (!target) return res.status(404).json({ error: 'workout not found' });
 
   const name = req.body.name != null ? String(req.body.name).trim() : target.name;
   const notes = req.body.notes != null ? String(req.body.notes).trim() : target.notes;
@@ -254,7 +321,9 @@ app.put('/api/workouts/:id', (req, res) => {
     target.sets = req.body.exercises
       .filter((e) => e && e.exercise)
       .map((e, idx) => ({
-        ...(e.id ? { id: Number(e.id) } : {}),
+        // Existing sets keep their id; brand-new ones get a fresh id so they
+        // stay addressable via /api/sets/:id (edit/delete) and Vue's :key.
+        id: e.id ? Number(e.id) : store.nextId++,
         exercise: String(e.exercise).trim(),
         sets: Math.max(1, Math.round(Number(e.sets) || 1)),
         reps: Math.max(0, Math.round(Number(e.reps) || 0)),
@@ -269,8 +338,8 @@ app.put('/api/workouts/:id', (req, res) => {
 });
 
 app.delete('/api/workouts/:id', (req, res) => {
-  if (!loadWorkout(req.params.id, read())) return res.status(404).json({ error: 'workout not found' });
   const store = read();
+  if (!loadWorkout(req.params.id, store)) return res.status(404).json({ error: 'workout not found' });
   store.workouts = store.workouts.filter((w) => w.id !== Number(req.params.id));
   write(store);
   res.json({ ok: true });
@@ -318,13 +387,12 @@ function validateSet(body) {
 }
 
 app.post('/api/workouts/:id/sets', (req, res) => {
-  const workout = loadWorkout(req.params.id, read());
-  if (!workout) return res.status(404).json({ error: 'workout not found' });
+  const store = read();
+  const target = loadWorkout(req.params.id, store);
+  if (!target) return res.status(404).json({ error: 'workout not found' });
   const v = validateSet(req.body);
   if (v.error) return res.status(400).json({ error: v.error });
 
-  const store = read();
-  const target = loadWorkout(req.params.id, store);
   const set = {
     id: store.nextId++,
     exercise: v.exercise,
@@ -389,9 +457,6 @@ app.delete('/api/sets/:id', (req, res) => {
 // ===== Workout status / timer endpoints =====
 
 app.put('/api/workouts/:id/status', (req, res) => {
-  const workout = loadWorkout(req.params.id, read());
-  if (!workout) return res.status(404).json({ error: 'workout not found' });
-
   const { status, elapsed_seconds } = req.body || {};
   if (!['idle', 'in_progress', 'completed'].includes(status)) {
     return res.status(400).json({ error: 'status must be idle, in_progress, or completed' });
@@ -602,6 +667,13 @@ app.get('/api/export.csv', (req, res) => {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="workouts.csv"');
   res.send(stringify(workoutsToCsvRows(workouts)));
+});
+
+// Errors from route handlers (e.g. a corrupted store) come back as JSON so
+// the frontend can show the real message instead of Express's HTML page.
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: err.message || 'internal error' });
 });
 
 app.listen(PORT, () => {

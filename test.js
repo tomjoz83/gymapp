@@ -14,12 +14,14 @@ const PORT = 4178;
 const BASE = `http://localhost:${PORT}`;
 const STORE = path.join(os.tmpdir(), `pt-test-${process.pid}.json`);
 const ARCHIVE = path.join(os.tmpdir(), `pt-test-archive-${process.pid}.json`);
+const TOKEN = 'test-token';
+const AUTH = { Authorization: `Bearer ${TOKEN}` };
 let srv;
 
 async function req(method, url, body) {
-  const opts = { method };
+  const opts = { method, headers: { ...AUTH } };
   if (body !== undefined) {
-    opts.headers = { 'Content-Type': 'application/json' };
+    opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
   const res = await fetch(BASE + url, opts);
@@ -27,11 +29,20 @@ async function req(method, url, body) {
   return { status: res.status, body: text ? JSON.parse(text) : {} };
 }
 
+// POST a raw CSV body to the import endpoint (with auth).
+async function importCsv(csv, qs = '') {
+  return fetch(`${BASE}/api/import${qs}`, {
+    method: 'POST',
+    headers: { ...AUTH, 'Content-Type': 'text/csv' },
+    body: csv,
+  });
+}
+
 before(async () => {
   fs.writeFileSync(STORE, JSON.stringify({ nextId: 1, workouts: [] }));
   srv = spawn(process.execPath, ['server.js'], {
     cwd: __dirname,
-    env: { ...process.env, PORT: String(PORT), STORE_PATH: STORE, ARCHIVE_PATH: ARCHIVE },
+    env: { ...process.env, PORT: String(PORT), STORE_PATH: STORE, ARCHIVE_PATH: ARCHIVE, AUTH_TOKEN: TOKEN },
     stdio: 'ignore',
   });
   for (let i = 0; i < 100; i++) {
@@ -55,11 +66,7 @@ test('import keeps same-named workouts on different dates separate', async () =>
     'Maybe Done,Monday,2026-07-06,,none,Squat,5,100',
   ].join('\n');
 
-  const res = await fetch(`${BASE}/api/import`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/csv' },
-    body: csv,
-  });
+  const res = await importCsv(csv);
   const data = await res.json();
   assert.strictEqual(res.status, 200);
   assert.strictEqual(data.workoutsCreated, 3, 'three distinct workouts created');
@@ -77,9 +84,7 @@ test('import reads the sets column and defaults missing sets to 1', async () => 
     'Leg Sets,Monday,2026-09-07,,no,Lunge,,12,20',     // blank sets -> default 1
   ].join('\n');
 
-  const res = await fetch(`${BASE}/api/import`, {
-    method: 'POST', headers: { 'Content-Type': 'text/csv' }, body: csv,
-  });
+  const res = await importCsv(csv);
   assert.strictEqual(res.status, 200);
 
   const all = (await req('GET', '/api/workouts')).body;
@@ -99,9 +104,7 @@ test('import reads the rpe column (blank/out-of-range -> null)', async () => {
     'RPE Day,Monday,2026-09-14,,no,Curl,3,12,50,15',    // out of range -> clamps to 10
   ].join('\n');
 
-  const res = await fetch(`${BASE}/api/import`, {
-    method: 'POST', headers: { 'Content-Type': 'text/csv' }, body: csv,
-  });
+  const res = await importCsv(csv);
   assert.strictEqual(res.status, 200);
 
   const all = (await req('GET', '/api/workouts')).body;
@@ -234,6 +237,32 @@ test('new workouts start in the idle status', async () => {
   assert.strictEqual(r.body.elapsed_seconds, 0);
 });
 
+test('requests without a valid token are rejected', async () => {
+  const noAuth = await fetch(`${BASE}/api/workouts`);
+  assert.strictEqual(noAuth.status, 401, 'missing token -> 401');
+
+  const badAuth = await fetch(`${BASE}/api/workouts`, { headers: { Authorization: 'Bearer nope' } });
+  assert.strictEqual(badAuth.status, 401, 'wrong token -> 401');
+
+  const viaQuery = await fetch(`${BASE}/api/export.csv?token=${TOKEN}`);
+  assert.strictEqual(viaQuery.status, 200, 'token via query string works for downloads');
+
+  const ok = await fetch(`${BASE}/api/workouts`, { headers: AUTH });
+  assert.strictEqual(ok.status, 200, 'valid token -> 200');
+});
+
+test('a corrupt store fails loudly instead of silently resetting', async () => {
+  const good = fs.readFileSync(STORE, 'utf8');
+  fs.writeFileSync(STORE, '{ this is not valid json');
+  try {
+    const r = await req('GET', '/api/workouts');
+    assert.strictEqual(r.status, 500, 'corrupt store returns 500, not an empty 200');
+    assert.match(r.body.error || '', /JSON/i, 'error explains the store is unreadable');
+  } finally {
+    fs.writeFileSync(STORE, good); // restore so later tests still run
+  }
+});
+
 // --- archive / clear / replace (run last: these wipe the active plan) ---
 
 test('completed workouts can be archived to a separate file', async () => {
@@ -264,9 +293,7 @@ test('import with replace clears the old plan and loads the new template', async
   await req('POST', '/api/workouts', { name: 'Old Plan', date: '2026-07-06' });
 
   const csv = 'name,day,date,notes,completed,exercise,reps,weight\nNew Plan,Monday,2026-08-03,,no,Bench,5,80';
-  const res = await fetch(`${BASE}/api/import?replace=1`, {
-    method: 'POST', headers: { 'Content-Type': 'text/csv' }, body: csv,
-  });
+  const res = await importCsv(csv, '?replace=1');
   const data = await res.json();
   assert.strictEqual(data.replaced, true);
 
