@@ -77,7 +77,11 @@ CREATE TABLE IF NOT EXISTS personal_records (
 function getDb(path) {
   const target = path || process.env.DB_PATH || './gym.db';
   if (cached && cachedPath === target) return cached;
-  if (cached) cached.close();
+  if (cached) {
+    cached.close();
+    cached = null;
+    cachedPath = null;
+  }
   const db = new DatabaseSync(target);
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(SCHEMA);
