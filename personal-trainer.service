@@ -6,12 +6,12 @@ After=network.target
 Type=simple
 User=tj
 Group=tj
-WorkingDirectory=/home/tj/claude/personal-trainer
+WorkingDirectory=/home/tj/apps/gymapp
 Environment=PORT=3000
 # Data/archive live OUTSIDE the repo so the app can write without causing git conflicts.
 Environment=STORE_PATH=/home/tj/personal-trainer-data.json
 Environment=ARCHIVE_PATH=/home/tj/personal-trainer-archive.json
-ExecStart=/home/tj/.local/bin/node /home/tj/claude/personal-trainer/server.js
+ExecStart=/home/tj/.local/bin/node /home/tj/apps/gymapp/server.js
 Restart=always
 RestartSec=3
 
