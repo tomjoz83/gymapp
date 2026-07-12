@@ -18,5 +18,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /home/tj/claude/personal-trainer
+            cd /home/tj/apps/gymapp
             bash deploy.sh
