@@ -34,4 +34,34 @@ function logSet(db, { sessionId, exerciseName, setNumber, weight = null, reps = 
   return Number(info.lastInsertRowid);
 }
 
-module.exports = { findOrCreateExercise, est1RM, createSession, logSet };
+function recomputePRs(db, exerciseId) {
+  const rows = db.prepare(
+    `SELECT sl.reps AS reps, sl.weight AS weight, ws.started_at AS at
+       FROM set_logs sl
+       JOIN workout_sessions ws ON ws.id = sl.session_id
+      WHERE sl.exercise_id = ? AND sl.is_warmup = 0 AND sl.is_complete = 1
+        AND sl.weight IS NOT NULL AND sl.reps IS NOT NULL AND sl.reps > 0`
+  ).all(exerciseId);
+
+  const best = new Map(); // rep_count -> {weight, est, at}
+  for (const r of rows) {
+    const est = est1RM(r.weight, r.reps);
+    const cur = best.get(r.reps);
+    if (!cur || est > cur.est) {
+      best.set(r.reps, { weight: r.weight, est, at: r.at });
+    } else if (r.weight > cur.weight) {
+      cur.weight = r.weight;
+    }
+  }
+
+  db.prepare('DELETE FROM personal_records WHERE exercise_id = ?').run(exerciseId);
+  const ins = db.prepare(
+    `INSERT INTO personal_records (exercise_id, rep_count, best_weight, best_est_1rm, achieved_at)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+  for (const [repCount, v] of best) {
+    ins.run(exerciseId, repCount, v.weight, v.est, v.at);
+  }
+}
+
+module.exports = { findOrCreateExercise, est1RM, createSession, logSet, recomputePRs };
