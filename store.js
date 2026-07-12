@@ -49,18 +49,23 @@ function recomputePRs(db, exerciseId) {
     const cur = best.get(r.reps);
     if (!cur || est > cur.est) {
       best.set(r.reps, { weight: r.weight, est, at: r.at });
-    } else if (r.weight > cur.weight) {
-      cur.weight = r.weight;
     }
   }
 
-  db.prepare('DELETE FROM personal_records WHERE exercise_id = ?').run(exerciseId);
-  const ins = db.prepare(
-    `INSERT INTO personal_records (exercise_id, rep_count, best_weight, best_est_1rm, achieved_at)
-     VALUES (?, ?, ?, ?, ?)`
-  );
-  for (const [repCount, v] of best) {
-    ins.run(exerciseId, repCount, v.weight, v.est, v.at);
+  db.exec('BEGIN');
+  try {
+    db.prepare('DELETE FROM personal_records WHERE exercise_id = ?').run(exerciseId);
+    const ins = db.prepare(
+      `INSERT INTO personal_records (exercise_id, rep_count, best_weight, best_est_1rm, achieved_at)
+       VALUES (?, ?, ?, ?, ?)`
+    );
+    for (const [repCount, v] of best) {
+      ins.run(exerciseId, repCount, v.weight, v.est, v.at);
+    }
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
   }
 }
 
