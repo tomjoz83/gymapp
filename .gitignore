@@ -5,6 +5,11 @@ node_modules/
 *.log
 server.log
 
+# Runtime data — lives outside the repo on the VPS (see STORE_PATH/ARCHIVE_PATH).
+# Not synced via git so the app can write freely without merge conflicts.
+data.json
+archive.json
+
 # Store write artifacts (atomic-save temp + backup)
 *.json.tmp
 *.json.bak
