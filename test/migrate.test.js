@@ -35,3 +35,21 @@ test('migrateFromJson maps workouts to sessions and sets to set_logs', () => {
   assert.ok(pr, 'PRs recomputed');
   closeDb();
 });
+
+test('migrateFromJson handles rest days and missing rpe', () => {
+  const db = getDb(':memory:');
+  const data = {
+    workouts: [
+      { id: 1, name: 'Rest', date: '2026-07-07', created_at: '2026-07-07 00:00:00', completed_at: null, notes: 'rest', sets: [] },
+      { id: 2, name: 'Legs', date: '2026-07-08', created_at: '2026-07-08 00:00:00', completed_at: null, notes: '', sets: [ { id: 3, exercise: 'Squat', sets: 3, reps: 5, weight: 100 } ] },
+    ],
+  };
+  const counts = migrateFromJson(db, data);
+  assert.strictEqual(counts.sessions, 2);
+  assert.strictEqual(counts.sets, 1);
+  const sessionCount = db.prepare('SELECT COUNT(*) c FROM workout_sessions').get().c;
+  assert.strictEqual(sessionCount, 2);
+  const log = db.prepare("SELECT * FROM set_logs").get();
+  assert.strictEqual(log.rpe, null);
+  closeDb();
+});
