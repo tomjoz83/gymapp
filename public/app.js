@@ -66,6 +66,7 @@ createApp({
       activeSession: null,
       workout: null,
       rest: { remaining: 0, running: false },
+      toast: '',
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -163,10 +164,35 @@ createApp({
         set.done = true;
         set.logId = row.id;
         startRest(ex.rest_seconds);
+        try {
+          const prog = await api(`/api/progress/${encodeURIComponent(ex.name)}`);
+          if (prog.pr && set.weight != null && set.reps != null) {
+            const est = set.weight * (1 + set.reps / 30);
+            if (est >= prog.pr.best_est_1rm - 0.01) {
+              showToast(`🎉 ${ex.name} PR! est 1RM ${Math.round(est)}kg`);
+            }
+          }
+        } catch (e) { /* progress is best-effort; ignore */ }
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
-    function finishWorkout() { /* Task 6 implements finish + PR toast */ stopRestInterval(); state.rest = { remaining: 0, running: false }; state.view = 'home'; }
+    async function finishWorkout() {
+      stopRestInterval();
+      state.rest = { remaining: 0, running: false };
+      if (state.activeSession) {
+        try { await api(`/api/sessions/${state.activeSession.id}/finish`, { method: 'POST' }); }
+        catch (e) { if (!e.unauthorized) state.error = e.message; }
+      }
+      state.activeSession = null;
+      state.workout = null;
+      state.view = 'home';
+      await loadWeek();
+    }
+
+    function showToast(msg) {
+      state.toast = msg;
+      setTimeout(() => { if (state.toast === msg) state.toast = ''; }, 3000);
+    }
 
     // Return to Home WITHOUT finishing the session. Every logged set is already
     // persisted server-side (each ✓ posts immediately), so the open session is

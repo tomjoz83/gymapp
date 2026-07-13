@@ -25,6 +25,7 @@
       <p v-if="error" class="error">{{ error }}</p>
     </div>
     <div v-else class="app-shell">
+      <div v-if="toast" class="toast">{{ toast }}</div>
       <main class="view">
         <section v-if="view === 'home'">
           <h2>Home</h2>
