@@ -77,15 +77,17 @@ createApp({
     async function unlock() {
       const t = state.tokenInput.trim();
       if (!t) return;
-      authToken = t;
-      localStorage.setItem('pt_token', t);
+      authToken = t; // in-memory so the verify call is authenticated
       state.tokenInput = '';
       state.error = '';
       try {
         await api('/api/active-program');
+        localStorage.setItem('pt_token', t); // persist only after success
         state.unlocked = true;
         await loadActiveProgram();
       } catch (e) {
+        authToken = '';
+        localStorage.removeItem('pt_token');
         state.unlocked = false;
         state.error = 'Wrong passphrase';
       }
