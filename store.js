@@ -71,20 +71,41 @@ function recomputePRs(db, exerciseId) {
   }
 }
 
+function assertNoDependentSessions(db, programId) {
+  const row = db.prepare(
+    `SELECT COUNT(*) c
+       FROM workout_sessions ws
+       JOIN routines r ON r.id = ws.routine_id
+       JOIN program_weeks w ON w.id = r.program_week_id
+      WHERE w.program_id = ?`
+  ).get(programId);
+  if (row.c > 0) {
+    throw new Error(
+      `Cannot delete program ${programId}: ${row.c} workout session(s) reference its routines.`
+    );
+  }
+}
+
 function importProgram(db, program, createdAt = null) {
   const result = validateProgram(program);
   if (!result.valid) {
     throw new Error('invalid program: ' + result.errors.join('; '));
   }
+
+  // Idempotent re-import: if this slug already exists, never destroy history.
+  const found = programExistsMatching(db, program);
+  if (found.id !== null) {
+    // Unchanged -> true no-op. Changed -> we still do not destructively rebuild,
+    // because programs are edited in-app, not by re-importing JSON. (Deferred:
+    // update-in-place / versioning.) Either way, keep existing rows and sessions.
+    return found.id;
+  }
+
   const stamp = createdAt || '1970-01-01 00:00:00';
   const isActive = program.active ? 1 : 0;
 
   db.exec('BEGIN');
   try {
-    const existing = db.prepare('SELECT id FROM programs WHERE slug = ?').get(program.slug);
-    if (existing) {
-      db.prepare('DELETE FROM programs WHERE id = ?').run(existing.id);
-    }
     const progInfo = db.prepare(
       'INSERT INTO programs (name, slug, description, active, created_at) VALUES (?, ?, ?, ?, ?)'
     ).run(program.name, program.slug, program.description || null, isActive, stamp);
@@ -161,7 +182,98 @@ function deleteSetLog(db, id) {
   return true;
 }
 
+function normNum(v) {
+  return v === undefined || v === null ? null : v;
+}
+
+// importProgram stores an empty/whitespace-only description as NULL (`description || null`),
+// so normalize the same way on both sides of the comparison to avoid a false "differs".
+function normDesc(v) {
+  return typeof v === 'string' && v.trim().length > 0 ? v : null;
+}
+
+// Reconstruct a stored program (by slug) into the same normalized shape as an
+// incoming validated program JSON, for deep comparison.
+function readStoredProgramShape(db, slug) {
+  const p = db.prepare(
+    'SELECT id, name, description, active FROM programs WHERE slug = ?'
+  ).get(slug);
+  if (!p) return null;
+  const weeks = db.prepare(
+    'SELECT id, week_number, label FROM program_weeks WHERE program_id = ? ORDER BY week_number'
+  ).all(p.id);
+  const shape = {
+    name: p.name,
+    description: normDesc(p.description),
+    active: !!p.active,
+    weeks: weeks.map((w) => {
+      const routines = db.prepare(
+        'SELECT id, name, day_of_week FROM routines WHERE program_week_id = ? ORDER BY order_index'
+      ).all(w.id);
+      return {
+        week_number: w.week_number,
+        label: normNum(w.label),
+        routines: routines.map((r) => {
+          const exs = db.prepare(
+            `SELECT e.name AS exercise, rx.target_sets, rx.target_reps, rx.target_weight,
+                    rx.target_rpe, rx.rest_seconds
+               FROM routine_exercises rx JOIN exercises e ON e.id = rx.exercise_id
+              WHERE rx.routine_id = ? ORDER BY rx.order_index`
+          ).all(r.id);
+          return {
+            name: r.name,
+            day_of_week: normNum(r.day_of_week),
+            exercises: exs.map((e) => ({
+              exercise: e.exercise,
+              target_sets: normNum(e.target_sets),
+              target_reps: normNum(e.target_reps),
+              target_weight: normNum(e.target_weight),
+              target_rpe: normNum(e.target_rpe),
+              rest_seconds: normNum(e.rest_seconds),
+            })),
+          };
+        }),
+      };
+    }),
+  };
+  return { id: p.id, shape };
+}
+
+// Normalize an incoming validated program JSON into the same shape.
+function incomingProgramShape(program) {
+  const weeks = [...program.weeks].sort((a, b) => a.week_number - b.week_number);
+  return {
+    name: program.name,
+    description: normDesc(program.description),
+    active: !!program.active,
+    weeks: weeks.map((w) => ({
+      week_number: w.week_number,
+      label: normNum(w.label),
+      routines: w.routines.map((r) => ({
+        name: r.name,
+        day_of_week: normNum(r.day_of_week),
+        exercises: r.exercises.map((e) => ({
+          exercise: e.exercise,
+          target_sets: normNum(e.target_sets),
+          target_reps: normNum(e.target_reps),
+          target_weight: normNum(e.target_weight),
+          target_rpe: normNum(e.target_rpe),
+          rest_seconds: normNum(e.rest_seconds),
+        })),
+      })),
+    })),
+  };
+}
+
+function programExistsMatching(db, program) {
+  const stored = readStoredProgramShape(db, program.slug);
+  if (!stored) return { match: false, id: null };
+  const a = JSON.stringify(stored.shape);
+  const b = JSON.stringify(incomingProgramShape(program));
+  return { match: a === b, id: stored.id };
+}
+
 module.exports = {
   findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
-  finishSession, updateSetLog, deleteSetLog,
+  finishSession, updateSetLog, deleteSetLog, programExistsMatching, assertNoDependentSessions,
 };
