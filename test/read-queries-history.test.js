@@ -43,3 +43,17 @@ test('getProgress returns empty for unknown exercise', () => {
   assert.deepStrictEqual(prog, { exercise: 'Nonexistent', history: [], pr: null });
   closeDb();
 });
+
+test('getProgress excludes warmup and incomplete sets', () => {
+  const db = getDb(':memory:');
+  const s1 = createSession(db, { startedAt: '2026-07-01 10:00:00' });
+  // a warmup set (should be ignored) + a real work set
+  logSet(db, { sessionId: s1, exerciseName: 'Squat', setNumber: 1, weight: 40, reps: 10, isWarmup: true });
+  logSet(db, { sessionId: s1, exerciseName: 'Squat', setNumber: 2, weight: 100, reps: 5 });
+  const prog = getProgress(db, 'Squat');
+  assert.strictEqual(prog.history.length, 1);
+  // volume should be only the work set (100*5), not include the 40*10 warmup
+  assert.strictEqual(prog.history[0].volume, 100 * 5);
+  assert.strictEqual(prog.history[0].top_weight, 100);
+  closeDb();
+});

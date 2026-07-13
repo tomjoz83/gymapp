@@ -55,7 +55,7 @@ function getSession(db, id) {
             sl.is_warmup, sl.is_complete
        FROM set_logs sl JOIN exercises e ON e.id = sl.exercise_id
       WHERE sl.session_id = ?
-      ORDER BY sl.set_number`
+      ORDER BY sl.set_number, sl.id`
   ).all(id);
   return s;
 }
@@ -66,7 +66,8 @@ function getProgress(db, exerciseName) {
   const rows = db.prepare(
     `SELECT ws.id AS session_id, ws.started_at AS date, sl.weight, sl.reps
        FROM set_logs sl JOIN workout_sessions ws ON ws.id = sl.session_id
-      WHERE sl.exercise_id = ? AND sl.weight IS NOT NULL AND sl.reps IS NOT NULL
+      WHERE sl.exercise_id = ? AND sl.is_warmup = 0 AND sl.is_complete = 1
+        AND sl.weight IS NOT NULL AND sl.reps IS NOT NULL
       ORDER BY ws.started_at ASC, ws.id ASC`
   ).all(ex.id);
 
