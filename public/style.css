@@ -35,3 +35,8 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .ex-dots .dot.done { background:var(--good); }
 .btn-next { flex:1; background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px; font-weight:700; min-height:48px; margin-left:8px; }
 .last-ex { flex:1; text-align:right; }
+.ex-chips { display:flex; gap:8px; overflow-x:auto; padding:4px 0 10px; -webkit-overflow-scrolling:touch; }
+.ex-chips .chip { flex:0 0 auto; background:var(--panel); color:var(--muted); border:1px solid #2a2e37; border-radius:999px; padding:8px 14px; font-size:13px; min-height:40px; white-space:nowrap; }
+.ex-chips .chip.on { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
+.ex-chips .chip.done { border-color:var(--good); color:var(--good); }
+.ex-chips .chip.on.done { background:var(--accent); color:#fff; }

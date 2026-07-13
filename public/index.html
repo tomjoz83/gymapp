@@ -49,9 +49,11 @@
           <div v-if="workout" class="exercise">
             <div class="ex-progress">
               <span class="ex-count">Exercise {{ workout.current + 1 }} of {{ workout.exercises.length }}</span>
-              <div class="ex-dots">
-                <span v-for="(ex, i) in workout.exercises" :key="i" class="dot" :class="{ on: i === workout.current, done: ex.sets.every(s => s.done) }"></span>
-              </div>
+            </div>
+            <div class="ex-chips">
+              <button v-for="(ex, i) in workout.exercises" :key="i" class="chip"
+                      :class="{ on: i === workout.current, done: ex.sets.every(s => s.done) }"
+                      @click="workout.current = i">{{ ex.name }}</button>
             </div>
             <h3>{{ workout.exercises[workout.current].name }}</h3>
             <table class="set-grid">
