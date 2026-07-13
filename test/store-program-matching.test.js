@@ -52,3 +52,13 @@ test('programExistsMatching: absent optional numeric (target_weight) equals stor
   assert.strictEqual(r.match, true);
   closeDb();
 });
+
+test('programExistsMatching: empty-string description matches stored NULL (import stores "" as NULL)', () => {
+  const db = getDb(':memory:');
+  const p = sampleProgram();
+  p.description = ''; // import stores "" as NULL via `description || null`
+  importProgram(db, p, '2026-07-14 00:00:00');
+  const r = programExistsMatching(db, p);
+  assert.strictEqual(r.match, true, 'empty description must not falsely report as differing');
+  closeDb();
+});

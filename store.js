@@ -186,6 +186,12 @@ function normNum(v) {
   return v === undefined || v === null ? null : v;
 }
 
+// importProgram stores an empty/whitespace-only description as NULL (`description || null`),
+// so normalize the same way on both sides of the comparison to avoid a false "differs".
+function normDesc(v) {
+  return typeof v === 'string' && v.trim().length > 0 ? v : null;
+}
+
 // Reconstruct a stored program (by slug) into the same normalized shape as an
 // incoming validated program JSON, for deep comparison.
 function readStoredProgramShape(db, slug) {
@@ -198,7 +204,7 @@ function readStoredProgramShape(db, slug) {
   ).all(p.id);
   const shape = {
     name: p.name,
-    description: normNum(p.description),
+    description: normDesc(p.description),
     active: !!p.active,
     weeks: weeks.map((w) => {
       const routines = db.prepare(
@@ -238,7 +244,7 @@ function incomingProgramShape(program) {
   const weeks = [...program.weeks].sort((a, b) => a.week_number - b.week_number);
   return {
     name: program.name,
-    description: normNum(program.description),
+    description: normDesc(program.description),
     active: !!program.active,
     weeks: weeks.map((w) => ({
       week_number: w.week_number,
