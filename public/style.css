@@ -26,3 +26,4 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .ck { width:44px; height:44px; border-radius:8px; border:none; background:#2a2e37; color:#3a4150; font-size:18px; }
 .ck.ok { background:var(--good); color:#04120a; }
 .ex-nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px; }
+.btn-back { background:var(--panel); color:var(--text); border:none; border-radius:8px; padding:8px 14px; font-weight:600; min-height:44px; }

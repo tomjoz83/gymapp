@@ -146,6 +146,13 @@ createApp({
 
     function finishWorkout() { /* Task 6 implements finish + PR toast */ state.view = 'home'; }
 
+    // Return to Home WITHOUT finishing the session. Every logged set is already
+    // persisted server-side (each ✓ posts immediately), so the open session is
+    // left intact and can be resumed; nothing is lost.
+    function leaveWorkout() {
+      state.view = 'home';
+    }
+
     async function startWorkout(routine) {
       try {
         const { id } = await api('/api/sessions', {
@@ -202,7 +209,7 @@ createApp({
     return {
       ...toRefs(state),
       unlock, lock, saveEffortScale, loadWeek, startWorkout,
-      logSet, finishWorkout,
+      logSet, finishWorkout, leaveWorkout,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },

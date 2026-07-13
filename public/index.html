@@ -42,6 +42,7 @@
         <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
         <section v-else-if="view === 'workout'">
           <div class="workout-top">
+            <button class="btn-back" @click="leaveWorkout">‹ Back</button>
             <span class="muted">{{ activeSession && activeSession.routine.name }}</span>
             <button class="btn-finish" @click="finishWorkout">Finish</button>
           </div>
