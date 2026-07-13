@@ -78,3 +78,43 @@ test('unauthenticated request is rejected', async () => {
   const r = await fetch(base + '/api/active-program');
   assert.strictEqual(r.status, 401);
 });
+
+test('GET /api/sessions/:id 404s for unknown id', async () => {
+  const r = await api('/api/sessions/99999');
+  assert.strictEqual(r.status, 404);
+});
+
+test('GET /api/program/week 404s for a missing week', async () => {
+  const r = await api('/api/program/week?number=99');
+  assert.strictEqual(r.status, 404);
+});
+
+test('PUT /api/sets/:id 404s for unknown id', async () => {
+  const r = await api('/api/sets/99999', { method: 'PUT', body: JSON.stringify({ weight: 50 }) });
+  assert.strictEqual(r.status, 404);
+});
+
+test('POST /api/sessions/:id/sets 400s without exerciseName', async () => {
+  const sid = (await (await api('/api/sessions', { method: 'POST', body: JSON.stringify({}) })).json()).id;
+  const r = await api('/api/sessions/' + sid + '/sets', { method: 'POST', body: JSON.stringify({ setNumber: 1, weight: 50, reps: 5 }) });
+  assert.strictEqual(r.status, 400);
+});
+
+test('set can be updated then deleted (PUT + DELETE 204)', async () => {
+  const sid = (await (await api('/api/sessions', { method: 'POST', body: JSON.stringify({}) })).json()).id;
+  const setRow = await (await api('/api/sessions/' + sid + '/sets', {
+    method: 'POST', body: JSON.stringify({ exerciseName: 'Bench Press', setNumber: 1, weight: 60, reps: 8 }),
+  })).json();
+  const upd = await (await api('/api/sets/' + setRow.id, { method: 'PUT', body: JSON.stringify({ weight: 65 }) })).json();
+  assert.strictEqual(upd.weight, 65);
+  const del = await api('/api/sets/' + setRow.id, { method: 'DELETE' });
+  assert.strictEqual(del.status, 204);
+});
+
+test('GET /api/sessions lists sessions and /api/progress returns shape', async () => {
+  const list = await (await api('/api/sessions')).json();
+  assert.ok(Array.isArray(list));
+  const prog = await (await api('/api/progress/Bench%20Press')).json();
+  assert.strictEqual(prog.exercise, 'Bench Press');
+  assert.ok(Array.isArray(prog.history));
+});
