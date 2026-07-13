@@ -34,6 +34,8 @@ echo "==> Service status:"
 systemctl --no-pager --full status personal-trainer | head -n 8 || true
 
 echo "==> HTTP check:"
-curl -s -o /dev/null -w "    http://localhost:3000 -> HTTP %{http_code}\n" http://localhost:3000/api/workouts || true
+# Hit a current endpoint. Unauthenticated /api returns 401 (server up + auth working);
+# a 200/401 both mean the app is alive. (The old /api/workouts route was removed in Phase 3a.)
+curl -s -o /dev/null -w "    http://localhost:3000/api/active-program -> HTTP %{http_code}\n" http://localhost:3000/api/active-program || true
 
 echo "==> Deploy complete."
