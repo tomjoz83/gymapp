@@ -161,7 +161,92 @@ function deleteSetLog(db, id) {
   return true;
 }
 
+function normNum(v) {
+  return v === undefined || v === null ? null : v;
+}
+
+// Reconstruct a stored program (by slug) into the same normalized shape as an
+// incoming validated program JSON, for deep comparison.
+function readStoredProgramShape(db, slug) {
+  const p = db.prepare(
+    'SELECT id, name, description, active FROM programs WHERE slug = ?'
+  ).get(slug);
+  if (!p) return null;
+  const weeks = db.prepare(
+    'SELECT id, week_number, label FROM program_weeks WHERE program_id = ? ORDER BY week_number'
+  ).all(p.id);
+  const shape = {
+    name: p.name,
+    description: normNum(p.description),
+    active: !!p.active,
+    weeks: weeks.map((w) => {
+      const routines = db.prepare(
+        'SELECT id, name, day_of_week FROM routines WHERE program_week_id = ? ORDER BY order_index'
+      ).all(w.id);
+      return {
+        week_number: w.week_number,
+        label: normNum(w.label),
+        routines: routines.map((r) => {
+          const exs = db.prepare(
+            `SELECT e.name AS exercise, rx.target_sets, rx.target_reps, rx.target_weight,
+                    rx.target_rpe, rx.rest_seconds
+               FROM routine_exercises rx JOIN exercises e ON e.id = rx.exercise_id
+              WHERE rx.routine_id = ? ORDER BY rx.order_index`
+          ).all(r.id);
+          return {
+            name: r.name,
+            day_of_week: normNum(r.day_of_week),
+            exercises: exs.map((e) => ({
+              exercise: e.exercise,
+              target_sets: normNum(e.target_sets),
+              target_reps: normNum(e.target_reps),
+              target_weight: normNum(e.target_weight),
+              target_rpe: normNum(e.target_rpe),
+              rest_seconds: normNum(e.rest_seconds),
+            })),
+          };
+        }),
+      };
+    }),
+  };
+  return { id: p.id, shape };
+}
+
+// Normalize an incoming validated program JSON into the same shape.
+function incomingProgramShape(program) {
+  const weeks = [...program.weeks].sort((a, b) => a.week_number - b.week_number);
+  return {
+    name: program.name,
+    description: normNum(program.description),
+    active: !!program.active,
+    weeks: weeks.map((w) => ({
+      week_number: w.week_number,
+      label: normNum(w.label),
+      routines: w.routines.map((r) => ({
+        name: r.name,
+        day_of_week: normNum(r.day_of_week),
+        exercises: r.exercises.map((e) => ({
+          exercise: e.exercise,
+          target_sets: normNum(e.target_sets),
+          target_reps: normNum(e.target_reps),
+          target_weight: normNum(e.target_weight),
+          target_rpe: normNum(e.target_rpe),
+          rest_seconds: normNum(e.rest_seconds),
+        })),
+      })),
+    })),
+  };
+}
+
+function programExistsMatching(db, program) {
+  const stored = readStoredProgramShape(db, program.slug);
+  if (!stored) return { match: false, id: null };
+  const a = JSON.stringify(stored.shape);
+  const b = JSON.stringify(incomingProgramShape(program));
+  return { match: a === b, id: stored.id };
+}
+
 module.exports = {
   findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
-  finishSession, updateSetLog, deleteSetLog,
+  finishSession, updateSetLog, deleteSetLog, programExistsMatching,
 };
