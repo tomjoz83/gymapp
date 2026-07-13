@@ -47,6 +47,12 @@
             <button class="btn-finish" @click="finishWorkout">Finish</button>
           </div>
           <div v-if="workout" class="exercise">
+            <div class="ex-progress">
+              <span class="ex-count">Exercise {{ workout.current + 1 }} of {{ workout.exercises.length }}</span>
+              <div class="ex-dots">
+                <span v-for="(ex, i) in workout.exercises" :key="i" class="dot" :class="{ on: i === workout.current, done: ex.sets.every(s => s.done) }"></span>
+              </div>
+            </div>
             <h3>{{ workout.exercises[workout.current].name }}</h3>
             <table class="set-grid">
               <thead><tr><th>Set</th><th>Prev</th><th>kg</th><th>Reps</th><th>{{ effortScale === 'rir' ? 'RIR' : 'RPE' }}</th><th>✓</th></tr></thead>
@@ -63,8 +69,10 @@
             </table>
             <div class="ex-nav">
               <button class="btn-secondary" :disabled="workout.current === 0" @click="workout.current--">‹ Prev</button>
-              <span class="muted">{{ workout.current + 1 }}/{{ workout.exercises.length }}</span>
-              <button class="btn-secondary" :disabled="workout.current === workout.exercises.length - 1" @click="workout.current++">Next ›</button>
+              <button v-if="workout.current < workout.exercises.length - 1" class="btn-next" @click="workout.current++">
+                Next: {{ workout.exercises[workout.current + 1].name }} ›
+              </button>
+              <span v-else class="muted last-ex">Last exercise</span>
             </div>
           </div>
         </section>

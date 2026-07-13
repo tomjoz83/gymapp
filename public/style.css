@@ -27,3 +27,11 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .ck.ok { background:var(--good); color:#04120a; }
 .ex-nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px; }
 .btn-back { background:var(--panel); color:var(--text); border:none; border-radius:8px; padding:8px 14px; font-weight:600; min-height:44px; }
+.ex-progress { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.ex-count { font-size:13px; font-weight:600; color:var(--accent); }
+.ex-dots { display:flex; gap:6px; }
+.ex-dots .dot { width:8px; height:8px; border-radius:50%; background:#2a2e37; }
+.ex-dots .dot.on { background:var(--accent); }
+.ex-dots .dot.done { background:var(--good); }
+.btn-next { flex:1; background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px; font-weight:700; min-height:48px; margin-left:8px; }
+.last-ex { flex:1; text-align:right; }
