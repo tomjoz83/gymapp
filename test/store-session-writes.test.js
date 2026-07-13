@@ -10,6 +10,7 @@ test('finishSession sets finished_at', () => {
   assert.strictEqual(r.finished_at, '2026-07-01 11:00:00');
   const row = db.prepare('SELECT finished_at FROM workout_sessions WHERE id = ?').get(sid);
   assert.strictEqual(row.finished_at, '2026-07-01 11:00:00');
+  assert.strictEqual(finishSession(db, 9999, '2026-07-01 11:00:00'), null);
   closeDb();
 });
 

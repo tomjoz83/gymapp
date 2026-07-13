@@ -133,7 +133,8 @@ function importProgram(db, program, createdAt = null) {
 }
 
 function finishSession(db, id, finishedAt) {
-  db.prepare('UPDATE workout_sessions SET finished_at = ? WHERE id = ?').run(finishedAt, id);
+  const info = db.prepare('UPDATE workout_sessions SET finished_at = ? WHERE id = ?').run(finishedAt, id);
+  if (info.changes === 0) return null;
   return { id, finished_at: finishedAt };
 }
 
