@@ -10,9 +10,11 @@
   <title>Personal Trainer</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Vendored locally so the app boots with no internet dependency. -->
-  <script src="vendor/vue.global.prod.js"></script>
-  <script src="logic.js"></script>
-  <script src="app.js"></script>
+  <!-- defer: run after the #app DOM is parsed, preserving Vue→logic→app order.
+       Without defer these head scripts run before <body>, so mount('#app') finds nothing. -->
+  <script defer src="vendor/vue.global.prod.js"></script>
+  <script defer src="logic.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
   <div id="app">
