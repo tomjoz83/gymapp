@@ -1,5 +1,7 @@
 'use strict';
 
+const { validateProgram } = require('./program-schema');
+
 function findOrCreateExercise(db, name) {
   const trimmed = String(name || '').trim();
   if (!trimmed) throw new Error('exercise name required');
@@ -69,4 +71,65 @@ function recomputePRs(db, exerciseId) {
   }
 }
 
-module.exports = { findOrCreateExercise, est1RM, createSession, logSet, recomputePRs };
+function importProgram(db, program, createdAt = null) {
+  const result = validateProgram(program);
+  if (!result.valid) {
+    throw new Error('invalid program: ' + result.errors.join('; '));
+  }
+  const stamp = createdAt || '1970-01-01 00:00:00';
+  const isActive = program.active ? 1 : 0;
+
+  db.exec('BEGIN');
+  try {
+    const existing = db.prepare('SELECT id FROM programs WHERE slug = ?').get(program.slug);
+    if (existing) {
+      db.prepare('DELETE FROM programs WHERE id = ?').run(existing.id);
+    }
+    const progInfo = db.prepare(
+      'INSERT INTO programs (name, slug, description, active, created_at) VALUES (?, ?, ?, ?, ?)'
+    ).run(program.name, program.slug, program.description || null, isActive, stamp);
+    const programId = Number(progInfo.lastInsertRowid);
+
+    if (isActive) {
+      db.prepare('UPDATE programs SET active = 0 WHERE id != ?').run(programId);
+    }
+
+    const insWeek = db.prepare(
+      'INSERT INTO program_weeks (program_id, week_number, label) VALUES (?, ?, ?)'
+    );
+    const insRoutine = db.prepare(
+      'INSERT INTO routines (program_week_id, name, day_of_week, order_index) VALUES (?, ?, ?, ?)'
+    );
+    const insRx = db.prepare(
+      `INSERT INTO routine_exercises
+         (routine_id, exercise_id, order_index, target_sets, target_reps, target_weight, target_rpe, rest_seconds)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+
+    for (const w of program.weeks) {
+      const weekId = Number(insWeek.run(programId, w.week_number, w.label || null).lastInsertRowid);
+      w.routines.forEach((r, ri) => {
+        const routineId = Number(insRoutine.run(weekId, r.name, r.day_of_week || null, ri).lastInsertRowid);
+        r.exercises.forEach((e, ei) => {
+          const exerciseId = findOrCreateExercise(db, e.exercise);
+          insRx.run(
+            routineId, exerciseId, ei,
+            e.target_sets != null ? e.target_sets : null,
+            e.target_reps != null ? e.target_reps : null,
+            e.target_weight != null ? e.target_weight : null,
+            e.target_rpe != null ? e.target_rpe : null,
+            e.rest_seconds != null ? e.rest_seconds : null
+          );
+        });
+      });
+    }
+
+    db.exec('COMMIT');
+    return programId;
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
+module.exports = { findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram };

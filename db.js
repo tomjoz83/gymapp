@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS exercises (
 CREATE TABLE IF NOT EXISTS programs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
+  slug TEXT UNIQUE,
   description TEXT,
   active INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
@@ -84,6 +85,23 @@ function getDb(path) {
   }
   const db = new DatabaseSync(target);
   db.exec('PRAGMA foreign_keys = ON;');
+  // Migration: if a pre-existing programs table predates the `slug` column,
+  // drop the (always-empty until Phase 2) program tables so SCHEMA recreates
+  // them with the new shape. Never touches sessions/set_logs/exercises/PRs.
+  const hasPrograms = db.prepare(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='programs'"
+  ).get();
+  if (hasPrograms) {
+    const cols = db.prepare('PRAGMA table_info(programs)').all().map((c) => c.name);
+    if (!cols.includes('slug')) {
+      db.exec(`
+        DROP TABLE IF EXISTS routine_exercises;
+        DROP TABLE IF EXISTS routines;
+        DROP TABLE IF EXISTS program_weeks;
+        DROP TABLE IF EXISTS programs;
+      `);
+    }
+  }
   db.exec(SCHEMA);
   cached = db;
   cachedPath = target;

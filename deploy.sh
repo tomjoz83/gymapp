@@ -22,6 +22,10 @@ else
   npm install --omit=dev
 fi
 
+echo "==> Importing programs into the database..."
+# DB_PATH must match the systemd service's DB_PATH env.
+DB_PATH="${DB_PATH:-/home/tj/personal-trainer.db}" node scripts/import-programs.js ./programs
+
 echo "==> Restarting the app (systemd service: personal-trainer)..."
 sudo systemctl restart personal-trainer
 sleep 2
