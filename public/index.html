@@ -66,7 +66,7 @@
                   <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done" /></td>
                   <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done" /></td>
                   <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done" /></td>
-                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done">✓</button></td>
+                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button></td>
                 </tr>
               </tbody>
             </table>
