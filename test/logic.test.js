@@ -35,3 +35,10 @@ test('formatPrevious renders rpe and rir scales', () => {
   assert.strictEqual(L.formatPrevious(prev, 'rir'), '60×8 (3 RIR)');
   assert.strictEqual(L.formatPrevious(null, 'rpe'), '—');
 });
+
+test('nextRestState seeds a countdown state', () => {
+  assert.deepStrictEqual(L.nextRestState(90), { remaining: 90, running: true });
+  assert.deepStrictEqual(L.nextRestState(0), { remaining: 0, running: false });
+  assert.deepStrictEqual(L.nextRestState(-5), { remaining: 0, running: false });
+  assert.deepStrictEqual(L.nextRestState(2.9), { remaining: 2, running: true });
+});
