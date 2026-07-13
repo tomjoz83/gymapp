@@ -10,272 +10,98 @@
   <title>Personal Trainer</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Vendored locally so the app boots with no internet dependency. -->
-  <script src="vendor/vue.global.prod.js"></script>
+  <!-- defer: run after the #app DOM is parsed, preserving Vue→logic→app order.
+       Without defer these head scripts run before <body>, so mount('#app') finds nothing. -->
+  <script defer src="vendor/vue.global.prod.js"></script>
+  <script defer src="logic.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
   <div id="app">
-    <header>
-      <h1>Personal Trainer</h1>
-      <nav>
-        <button :class="{ active: view === 'overview' }" @click="view = 'overview'; loadOverview()">Overview</button>
-        <button :class="{ active: view === 'progress' }" @click="loadProgress()">Progress</button>
-        <button :class="{ active: view === 'data' }" @click="view = 'data'">Import / Export</button>
-      </nav>
-    </header>
-
-    <p v-if="error" class="banner error">{{ error }}</p>
-    <p v-if="message" class="banner ok">{{ message }}</p>
-
-    <main>
-      <!-- ===================== PASSPHRASE GATE ===================== -->
-      <section v-if="needAuth" class="card auth-gate">
-        <h3>🔒 Sign in</h3>
-        <p>Enter the passphrase for this app. It's remembered on this device.</p>
-        <p v-if="authFailed" class="banner error">That passphrase didn't work.</p>
-        <form class="row" @submit.prevent="submitToken">
-          <input v-model="tokenInput" type="password" placeholder="Passphrase" autocomplete="current-password" />
-          <button type="submit">Unlock</button>
-        </form>
-      </section>
-
-      <template v-else>
-      <!-- ===================== OVERVIEW ===================== -->
-      <section v-show="view === 'overview'">
-        <form class="card row" @submit.prevent="createWorkout">
-          <input v-model="newWorkout.name" type="text" placeholder="Workout name e.g. Push Day" required />
-          <input v-model="newWorkout.date" type="date" />
-          <button type="submit">Add workout</button>
-        </form>
-        <div class="overview-header">
-          <button class="ghost small" @click="changeWeek(-1)">← Prev</button>
-          <div class="week-title">
-            {{ weekLabel }}
-            <button v-if="weekOffset !== 0" class="ghost small today-btn" @click="goThisWeek">This week</button>
-          </div>
-          <button class="ghost small" @click="changeWeek(1)">Next →</button>
-        </div>
-        <div class="week-grid" v-if="week">
-          <div class="day-cell" v-for="day in week.days" :key="day.date" :class="{ 'is-today': isToday(day.date) }">
-            <div class="day-header">
-              <div class="day-name">{{ day.day }}</div>
-              <div class="day-date">{{ formatDate(day.date) }}</div>
-            </div>
-            <div class="day-workouts" v-if="day.workouts && day.workouts.length">
-              <div class="week-workout" v-for="w in day.workouts" :key="w.id" @click="openWorkout(w)" role="button" tabindex="0">
-                <div class="week-workout-name">{{ w.name }}</div>
-                <div class="week-workout-timer" v-if="w.status === 'in_progress' || w.status === 'completed'">
-                  <span class="timer-chip">{{ formatElapsed(w.elapsed_seconds || 0) }}</span>
-                  <span class="status-dot" :class="w.status"></span>
-                </div>
+    <div v-if="!unlocked" class="unlock">
+      <h1>🏋️ Personal Trainer</h1>
+      <input v-model="tokenInput" type="password" placeholder="Passphrase" class="unlock-input" @keyup.enter="unlock" />
+      <button class="btn-primary" @click="unlock">Unlock</button>
+      <p v-if="error" class="error">{{ error }}</p>
+    </div>
+    <div v-else class="app-shell">
+      <div v-if="toast" class="toast">{{ toast }}</div>
+      <main class="view">
+        <section v-if="view === 'home'">
+          <h2>Home</h2>
+          <p v-if="!activeProgram" class="muted">No active program. Load one via the program loader.</p>
+          <div v-else>
+            <p class="muted">{{ activeProgram.name }} · Week {{ currentWeek }}/{{ activeProgram.weekCount }}</p>
+            <div v-if="week">
+              <div v-for="r in week.routines" :key="r.id" class="day-card" @click="startWorkout(r)">
+                <div class="day-name">{{ r.name }}</div>
+                <div class="muted">{{ r.day_of_week }} · {{ r.exercises.length }} exercises</div>
               </div>
             </div>
-            <div class="day-empty" v-else>
-              <span class="empty-dot"></span>
-              <span>No sessions</span>
-            </div>
           </div>
-        </div>
-        <p v-else class="empty">Loading week…</p>
-      </section>
-
-      <!-- ===================== WORKOUT DETAIL ===================== -->
-      <section v-if="view === 'workouts' && selectedWorkout">
-        <button class="ghost small" @click="goBackToOverview">← Back</button>
-        <div class="card workout" :class="{ done: selectedWorkout.completed }">
-          <div class="workout-head">
-            <div v-if="editingWorkoutId !== selectedWorkout.id" class="title">
-              <h3>
-                <span class="check">{{ selectedWorkout.completed ? '✅' : '⬜' }}</span>
-                {{ selectedWorkout.name }}
-              </h3>
-              <small v-if="selectedWorkout.notes">{{ selectedWorkout.notes }}</small>
-              <small class="muted">{{ selectedWorkout.date || 'unscheduled' }}</small>
-              <small class="muted timer-line" v-if="selectedWorkout.status === 'in_progress' || selectedWorkout.status === 'completed'">
-                <span class="status-dot" :class="selectedWorkout.status"></span>
-                {{ selectedWorkout.status === 'completed' ? formatElapsed(selectedWorkout.elapsed_seconds || 0) : timerDisplay }}
-              </small>
-            </div>
-            <div v-else class="title row">
-              <input v-model="editWorkout.name" type="text" />
-              <input v-model="editWorkout.notes" type="text" placeholder="Notes" />
-            </div>
-
-            <div class="actions">
-              <template v-if="editingWorkoutId !== selectedWorkout.id">
-                <template v-if="selectedWorkout.status === 'idle' || !selectedWorkout.status">
-                  <button class="small success" @click="startWorkout(selectedWorkout)">Start</button>
-                </template>
-                <template v-else-if="selectedWorkout.status === 'in_progress'">
-                  <button v-if="running" class="small" @click="pauseWorkout(selectedWorkout)">Pause</button>
-                  <button v-else class="small success" @click="resumeWorkout(selectedWorkout)">Resume</button>
-                  <button class="small danger" @click="finishWorkout(selectedWorkout)">Finish</button>
-                </template>
-                <template v-else>
-                  <button class="small" @click="reopenWorkout(selectedWorkout)">Reopen</button>
-                </template>
-                <button class="small ghost" @click="startEditWorkout(selectedWorkout)">Edit</button>
-                <button class="small danger" @click="deleteWorkout(selectedWorkout)">Delete</button>
-              </template>
-              <template v-else>
-                <button class="small" @click="saveWorkout(selectedWorkout)">Save</button>
-                <button class="small ghost" @click="editingWorkoutId = null">Cancel</button>
-              </template>
-            </div>
+        </section>
+        <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
+        <section v-else-if="view === 'workout'">
+          <div class="workout-top">
+            <button class="btn-back" @click="leaveWorkout">‹ Back</button>
+            <span class="muted">{{ activeSession && activeSession.routine.name }}</span>
+            <button class="btn-finish" @click="finishWorkout">Finish</button>
           </div>
-
-          <div class="table-wrap" v-if="selectedWorkout.sets && selectedWorkout.sets.length">
-          <table class="sets">
-            <thead>
-              <tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>RPE</th><th>Weight</th><th></th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="s in selectedWorkout.sets" :key="s.id">
-                <template v-if="selectedWorkout.status === 'in_progress' && setEdits[s.id]">
-                  <td><input v-model="setEdits[s.id].exercise" @change="saveSetInline(selectedWorkout, s)" /></td>
-                  <td><input v-model.number="setEdits[s.id].sets" type="number" min="1" @change="saveSetInline(selectedWorkout, s)" /></td>
-                  <td><input v-model.number="setEdits[s.id].reps" type="number" min="1" @change="saveSetInline(selectedWorkout, s)" /></td>
-                  <td><input v-model.number="setEdits[s.id].rpe" type="number" min="1" max="10" step="1" placeholder="–" @change="saveSetInline(selectedWorkout, s)" /></td>
-                  <td><input v-model.number="setEdits[s.id].weight" type="number" min="0" step="0.5" @change="saveSetInline(selectedWorkout, s)" /></td>
-                  <td class="nowrap">
-                    <button class="small danger" @click="deleteSet(selectedWorkout, s)">✕</button>
-                  </td>
-                </template>
-                <template v-else-if="editingSetId === s.id">
-                  <td><input v-model="editSet.exercise" /></td>
-                  <td><input v-model.number="editSet.sets" type="number" min="1" /></td>
-                  <td><input v-model.number="editSet.reps" type="number" min="1" /></td>
-                  <td><input v-model.number="editSet.rpe" type="number" min="1" max="10" step="1" placeholder="–" /></td>
-                  <td><input v-model.number="editSet.weight" type="number" min="0" step="0.5" /></td>
-                  <td class="nowrap">
-                    <button class="small" @click="saveSet(selectedWorkout, s)">Save</button>
-                    <button class="small ghost" @click="editingSetId = null">Cancel</button>
-                  </td>
-                </template>
-                <template v-else>
-                  <td>{{ s.exercise }}</td>
-                  <td>{{ s.sets || 1 }}</td>
-                  <td>{{ s.reps }}</td>
-                  <td>{{ s.rpe ? '@' + s.rpe : '—' }}</td>
-                  <td>{{ s.weight }}</td>
-                  <td class="nowrap">
-                    <button class="small ghost" @click="startEditSet(s)">Edit</button>
-                    <button class="small danger" @click="deleteSet(selectedWorkout, s)">✕</button>
-                  </td>
-                </template>
-              </tr>
-            </tbody>
-          </table>
-          </div>
-
-          <form class="row add-set" @submit.prevent="addSet(selectedWorkout)">
-            <input v-model="(setDrafts[selectedWorkout.id] || {}).exercise" placeholder="Exercise e.g. Bench Press" />
-            <input v-model.number="(setDrafts[selectedWorkout.id] || {}).sets" type="number" min="1" placeholder="Sets" />
-            <input v-model.number="(setDrafts[selectedWorkout.id] || {}).reps" type="number" min="1" placeholder="Reps" />
-            <input v-model.number="(setDrafts[selectedWorkout.id] || {}).rpe" type="number" min="1" max="10" step="1" placeholder="RPE" />
-            <input v-model.number="(setDrafts[selectedWorkout.id] || {}).weight" type="number" min="0" step="0.5" placeholder="Weight" />
-            <button type="submit">Log set</button>
-          </form>
-
-          <div class="timer-card" v-if="selectedWorkout.status === 'in_progress' || selectedWorkout.status === 'idle' || !selectedWorkout.status">
-            <div class="timer-head">Rest timer</div>
-            <div class="timer-clock">{{ restTimerDisplay }}</div>
-            <div class="timer-controls" style="align-items: center;">
-              <select class="select-timer" v-model.number="timerDuration" @change="setRest(timerDuration)">
-                <option v-for="p in timerPresets" :key="p" :value="p">{{ p }}s</option>
-              </select>
+          <div v-if="workout" class="exercise">
+            <div class="ex-progress">
+              <span class="ex-count">Exercise {{ workout.current + 1 }} of {{ workout.exercises.length }}</span>
             </div>
-            <div class="timer-controls">
-              <button class="small" @click="bumpRest(-15)">−15s</button>
-              <button class="small success" @click="startRest">Start</button>
-              <button class="small" @click="pauseRest">Pause</button>
-              <button class="small" @click="bumpRest(15)">+15s</button>
-              <button class="small danger" @click="resetRest">Reset</button>
+            <div class="ex-chips">
+              <button v-for="(ex, i) in workout.exercises" :key="i" class="chip"
+                      :class="{ on: i === workout.current, done: ex.sets.every(s => s.done) }"
+                      @click="workout.current = i">{{ ex.name }}</button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===================== PROGRESS ===================== -->
-      <section v-show="view === 'progress'">
-        <p v-if="!progress" class="empty">Loading progress…</p>
-        <p v-else-if="!progress.length" class="empty">Log some sets to see your progress per exercise here.</p>
-        <div v-else class="workout-list">
-          <div v-for="ex in progress" :key="ex.key" class="card exercise-progress">
-            <div class="workout-head">
-              <div class="title">
-                <h3>{{ ex.name }}</h3>
-                <small class="muted">
-                  {{ ex.sessionCount }} session{{ ex.sessionCount === 1 ? '' : 's' }}
-                  · top {{ ex.topWeight }} · last {{ formatDate(ex.lastDate) }}
-                </small>
-              </div>
-              <svg v-if="ex.spark" class="spark" :viewBox="'0 0 ' + ex.spark.w + ' ' + ex.spark.h" preserveAspectRatio="none">
-                <polyline v-if="!ex.spark.single" :points="ex.spark.points" fill="none" />
-                <circle :cx="ex.spark.lastX" :cy="ex.spark.lastY" r="3" />
-              </svg>
-            </div>
-
-            <div class="table-wrap">
-            <table class="sets">
-              <thead>
-                <tr><th>Date</th><th>Sets logged</th><th>Top wt</th><th>Volume</th></tr>
-              </thead>
+            <h3>{{ workout.exercises[workout.current].name }}</h3>
+            <table class="set-grid">
+              <thead><tr><th>Set</th><th>Prev</th><th>kg</th><th>Reps</th><th>{{ effortScale === 'rir' ? 'RIR' : 'RPE' }}</th><th>✓</th></tr></thead>
               <tbody>
-                <tr v-for="s in ex.sessions" :key="s.date">
-                  <td class="nowrap">{{ formatDate(s.date) }}</td>
-                  <td>{{ s.summary }}</td>
-                  <td>{{ s.topWeight }}</td>
-                  <td>{{ s.volume }}</td>
+                <tr v-for="s in workout.exercises[workout.current].sets" :key="s.set_number" :class="{ done: s.done }">
+                  <td>{{ s.set_number }}</td>
+                  <td class="prev">{{ fmtPrev(s.prev) }}</td>
+                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done" /></td>
+                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button></td>
                 </tr>
               </tbody>
             </table>
+            <div class="ex-nav">
+              <button class="btn-secondary" :disabled="workout.current === 0" @click="workout.current--">‹ Prev</button>
+              <button v-if="workout.current < workout.exercises.length - 1" class="btn-next" @click="workout.current++">
+                Next: {{ workout.exercises[workout.current + 1].name }} ›
+              </button>
+              <span v-else class="muted last-ex">Last exercise</span>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- ===================== IMPORT / EXPORT ===================== -->
-      <section v-show="view === 'data'">
-        <div class="card">
-          <h3>Export</h3>
-          <p>Download every workout and set as a CSV file.</p>
-          <a class="btn" :href="'/api/export.csv?token=' + encodeURIComponent(authToken)">Download workouts.csv</a>
-          <a class="btn ghost" href="/workouts-template.csv" download>Get CSV template</a>
-        </div>
-
-        <div class="card">
-          <h3>Import</h3>
-          <p>Upload a CSV (same columns as the template). Rows are grouped into
-             workouts by <code>name</code> + <code>date</code>, so the same
-             workout on different dates stays separate.</p>
-          <input type="file" accept=".csv,text/csv" @change="onFile" />
-          <label style="display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--muted);font-size:0.9rem;">
-            <input type="checkbox" v-model="replaceOnImport" style="width:auto;" />
-            Replace current plan (archives completed, then clears existing)
+          <div v-if="workout && rest.running" class="rest-bar">
+            <button class="btn-secondary" @click="addRest(-15)">−15</button>
+            <span class="rest-time">{{ Math.floor(rest.remaining/60) }}:{{ String(rest.remaining%60).padStart(2,'0') }}</span>
+            <button class="btn-secondary" @click="addRest(15)">+15</button>
+            <button class="btn-secondary" @click="skipRest">Skip</button>
+          </div>
+        </section>
+        <section v-else-if="view === 'settings'">
+          <h2>Settings</h2>
+          <label class="row">Effort scale
+            <select v-model="effortScale" @change="saveEffortScale">
+              <option value="rpe">RPE (1–10)</option>
+              <option value="rir">RIR (0–5)</option>
+            </select>
           </label>
-          <button :disabled="!importText" @click="doImport">{{ replaceOnImport ? 'Replace with CSV' : 'Import CSV' }}</button>
-          <pre v-if="importText" class="preview">{{ importText.slice(0, 600) }}</pre>
-        </div>
-
-        <div class="card">
-          <h3>Archive</h3>
-          <p>Completed workouts saved to a separate file: <strong>{{ archiveCount }}</strong>.
-             These are kept safe and are <em>not</em> removed when you clear or replace your plan.</p>
-          <button class="ghost" @click="archiveCompleted">Archive completed now</button>
-          <a class="btn ghost" :href="'/api/archive.csv?token=' + encodeURIComponent(authToken)">Download archive CSV</a>
-        </div>
-
-        <div class="card">
-          <h3>Danger zone</h3>
-          <p>Remove every workout from your current plan. Completed workouts are
-             archived first, so finished sessions are preserved.</p>
-          <button class="danger" @click="clearAllWorkouts">Clear all workouts</button>
-        </div>
-      </section>
-      </template>
-    </main>
+          <button class="btn-secondary" @click="lock">Lock app</button>
+        </section>
+      </main>
+      <nav class="tabbar">
+        <button :class="{ active: view === 'home' }" @click="view = 'home'"><span class="ic">🏠</span>Home</button>
+        <button :class="{ active: view === 'progress' }" @click="view = 'progress'"><span class="ic">📈</span>Progress</button>
+        <button :class="{ active: view === 'settings' }" @click="view = 'settings'"><span class="ic">⚙️</span>Settings</button>
+      </nav>
+    </div>
   </div>
-
-  <script src="app.js"></script>
 </body>
 </html>
