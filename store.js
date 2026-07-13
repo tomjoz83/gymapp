@@ -132,4 +132,35 @@ function importProgram(db, program, createdAt = null) {
   }
 }
 
-module.exports = { findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram };
+function finishSession(db, id, finishedAt) {
+  db.prepare('UPDATE workout_sessions SET finished_at = ? WHERE id = ?').run(finishedAt, id);
+  return { id, finished_at: finishedAt };
+}
+
+function updateSetLog(db, id, fields = {}) {
+  const existing = db.prepare('SELECT * FROM set_logs WHERE id = ?').get(id);
+  if (!existing) return null;
+  const weight = fields.weight != null ? fields.weight : existing.weight;
+  const reps = fields.reps != null ? fields.reps : existing.reps;
+  const rpe = fields.rpe !== undefined ? fields.rpe : existing.rpe;
+  const isWarmup = fields.isWarmup != null ? (fields.isWarmup ? 1 : 0) : existing.is_warmup;
+  const isComplete = fields.isComplete != null ? (fields.isComplete ? 1 : 0) : existing.is_complete;
+  db.prepare(
+    'UPDATE set_logs SET weight = ?, reps = ?, rpe = ?, is_warmup = ?, is_complete = ? WHERE id = ?'
+  ).run(weight, reps, rpe, isWarmup, isComplete, id);
+  recomputePRs(db, existing.exercise_id);
+  return db.prepare('SELECT * FROM set_logs WHERE id = ?').get(id);
+}
+
+function deleteSetLog(db, id) {
+  const existing = db.prepare('SELECT exercise_id FROM set_logs WHERE id = ?').get(id);
+  if (!existing) return false;
+  db.prepare('DELETE FROM set_logs WHERE id = ?').run(id);
+  recomputePRs(db, existing.exercise_id);
+  return true;
+}
+
+module.exports = {
+  findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
+  finishSession, updateSetLog, deleteSetLog,
+};
