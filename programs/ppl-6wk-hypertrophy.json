@@ -1,0 +1,1070 @@
+{
+  "slug": "ppl-6wk-hypertrophy",
+  "name": "6-Week PPL Hypertrophy",
+  "description": "Push/Pull/Legs + Upper, 4 days/week. Reps 12→8, RPE 7→9 across 6 weeks.",
+  "active": true,
+  "weeks": [
+    {
+      "week_number": 1,
+      "label": "Foundation (RPE 7)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 12,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "week_number": 2,
+      "label": "Foundation (RPE 7)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 11,
+              "target_rpe": 7,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "week_number": 3,
+      "label": "Build (RPE 8)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 10,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "week_number": 4,
+      "label": "Build (RPE 8)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 9,
+              "target_rpe": 8,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "week_number": 5,
+      "label": "Peak (RPE 9)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "week_number": 6,
+      "label": "Peak (RPE 9)",
+      "routines": [
+        {
+          "name": "Push Day",
+          "day_of_week": "Monday",
+          "exercises": [
+            {
+              "exercise": "Barbell Bench Press",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 150
+            },
+            {
+              "exercise": "Overhead Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Incline Dumbbell Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Cable Lateral Raise",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Triceps Pushdown",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Pull Day",
+          "day_of_week": "Tuesday",
+          "exercises": [
+            {
+              "exercise": "Deadlift",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Lat Pulldown",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Seated Cable Row",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Face Pull",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Barbell Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        },
+        {
+          "name": "Leg Day",
+          "day_of_week": "Thursday",
+          "exercises": [
+            {
+              "exercise": "Back Squat",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 180
+            },
+            {
+              "exercise": "Romanian Deadlift",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Leg Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Leg Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Standing Calf Raise",
+              "target_sets": 4,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 45
+            }
+          ]
+        },
+        {
+          "name": "Upper Day",
+          "day_of_week": "Friday",
+          "exercises": [
+            {
+              "exercise": "Incline Barbell Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 120
+            },
+            {
+              "exercise": "Pull-Up",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Dumbbell Shoulder Press",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Chest-Supported Row",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 90
+            },
+            {
+              "exercise": "Hammer Curl",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            },
+            {
+              "exercise": "Overhead Triceps Extension",
+              "target_sets": 3,
+              "target_reps": 8,
+              "target_rpe": 9,
+              "rest_seconds": 60
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
