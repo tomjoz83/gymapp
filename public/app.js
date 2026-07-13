@@ -76,24 +76,34 @@ createApp({
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
-    // Find the most recent PRIOR session's sets for an exercise (for prefill + "previous").
-    async function priorSetsFor(exerciseName) {
+    // Fetch prior sessions' full set data ONCE, newest first, excluding the active session.
+    async function loadPriorSessions() {
+      const result = [];
       try {
-        const sessions = await api('/api/sessions');
+        const sessions = await api('/api/sessions'); // most recent first
         for (const s of sessions) {
           if (state.activeSession && s.id === state.activeSession.id) continue;
           const full = await api(`/api/sessions/${s.id}`);
-          const matching = full.sets.filter((x) => x.exercise === exerciseName);
-          if (matching.length) return matching;
+          result.push(full);
         }
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
+      return result;
+    }
+
+    // Given already-loaded prior sessions, return the newest session's sets for an exercise.
+    function priorSetsFor(priorSessions, exerciseName) {
+      for (const full of priorSessions) {
+        const matching = full.sets.filter((x) => x.exercise === exerciseName);
+        if (matching.length) return matching;
+      }
       return [];
     }
 
     async function initWorkout(routine) {
+      const priorSessions = await loadPriorSessions();
       const exercises = [];
       for (const rx of routine.exercises) {
-        const prior = await priorSetsFor(rx.exercise);
+        const prior = priorSetsFor(priorSessions, rx.exercise);
         const sets = [];
         for (let i = 1; i <= (rx.target_sets || 1); i++) {
           const pf = PTLogic.prefillForSet(prior, i, rx);
@@ -127,6 +137,7 @@ createApp({
             rpe: set.rpe,
           }),
         });
+        if (!row || row.id == null) throw new Error('set log failed: no id returned');
         set.done = true;
         set.logId = row.id;
         startRest(ex.rest_seconds);
