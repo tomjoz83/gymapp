@@ -537,3 +537,19 @@ code { background: var(--panel-2); padding: 2px 6px; border-radius: 6px; font-si
   vector-effect: non-scaling-stroke;
 }
 .spark circle { fill: var(--accent); }
+
+/* ===== Phase 3b shell styles ===== */
+:root { --bg:#0f1115; --panel:#1c2028; --accent:#2b6ef6; --text:#cfd3dc; --muted:#7f8896; --good:#4ade80; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, sans-serif; }
+.app-shell { min-height:100vh; display:flex; flex-direction:column; padding-bottom:64px; }
+.view { flex:1; padding:16px; }
+.tabbar { position:fixed; bottom:0; left:0; right:0; display:flex; background:#171a21; border-top:1px solid #2a2e37; }
+.tabbar button { flex:1; background:none; border:none; color:var(--muted); font-size:11px; padding:8px 0; min-height:52px; }
+.tabbar button.active { color:var(--accent); }
+.tabbar .ic { display:block; font-size:20px; }
+.btn-primary { background:var(--accent); color:#fff; border:none; border-radius:12px; padding:14px 18px; font-size:16px; font-weight:700; width:100%; min-height:52px; }
+.btn-secondary { background:var(--panel); color:var(--text); border:none; border-radius:10px; padding:12px; min-height:44px; }
+.unlock { padding:40px 20px; display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto; }
+.unlock-input { padding:14px; border-radius:10px; border:1px solid #2a2e37; background:var(--panel); color:var(--text); font-size:16px; }
+.muted { color:var(--muted); } .error { color:#f87171; } .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; }
