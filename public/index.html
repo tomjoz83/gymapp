@@ -29,9 +29,18 @@
           <p v-if="!activeProgram" class="muted">No active program. Load one via the program loader.</p>
           <div v-else>
             <p class="muted">{{ activeProgram.name }} · Week {{ currentWeek }}/{{ activeProgram.weekCount }}</p>
+            <div v-if="week">
+              <div v-for="r in week.routines" :key="r.id" class="day-card" @click="startWorkout(r)">
+                <div class="day-name">{{ r.name }}</div>
+                <div class="muted">{{ r.day_of_week }} · {{ r.exercises.length }} exercises</div>
+              </div>
+            </div>
           </div>
         </section>
         <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
+        <section v-else-if="view === 'workout'">
+          <p class="muted">Starting {{ activeSession && activeSession.routine.name }}…</p>
+        </section>
         <section v-else-if="view === 'settings'">
           <h2>Settings</h2>
           <label class="row">Effort scale

@@ -13,3 +13,5 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .unlock { padding:40px 20px; display:flex; flex-direction:column; gap:12px; max-width:360px; margin:0 auto; }
 .unlock-input { padding:14px; border-radius:10px; border:1px solid #2a2e37; background:var(--panel); color:var(--text); font-size:16px; }
 .muted { color:var(--muted); } .error { color:#f87171; } .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; }
+.day-card { background:var(--panel); border-radius:12px; padding:16px; margin-bottom:10px; min-height:64px; }
+.day-name { font-size:16px; font-weight:700; margin-bottom:2px; }

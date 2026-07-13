@@ -62,13 +62,41 @@ createApp({
       activeProgram: null,
       currentWeek: 1,
       effortScale: localStorage.getItem('pt_effort_scale') || 'rpe',
+      week: null,
+      activeSession: null,
+      workout: null,
     });
 
     onUnauthorized = () => { state.unlocked = false; };
 
+    async function loadWeek() {
+      if (!state.activeProgram) return;
+      try {
+        state.week = await api(`/api/program/week?number=${state.currentWeek}`);
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+
+    async function initWorkout(routine) {
+      // Task 4 fills this in (builds the set grid). Stub for now.
+    }
+
+    async function startWorkout(routine) {
+      try {
+        const { id } = await api('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ routineId: routine.id }),
+        });
+        state.activeSession = { id, routine };
+        state.view = 'workout';
+        await initWorkout(routine);
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+
     async function loadActiveProgram() {
       try {
         state.activeProgram = await api('/api/active-program');
+        await loadWeek();
       } catch (e) {
         if (!e.unauthorized) state.error = e.message;
       }
@@ -105,6 +133,6 @@ createApp({
 
     if (state.unlocked) loadActiveProgram();
 
-    return { ...toRefs(state), unlock, lock, saveEffortScale };
+    return { ...toRefs(state), unlock, lock, saveEffortScale, loadWeek, startWorkout };
   },
 }).mount('#app');
