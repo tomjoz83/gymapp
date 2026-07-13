@@ -39,7 +39,31 @@
         </section>
         <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
         <section v-else-if="view === 'workout'">
-          <p class="muted">Starting {{ activeSession && activeSession.routine.name }}…</p>
+          <div class="workout-top">
+            <span class="muted">{{ activeSession && activeSession.routine.name }}</span>
+            <button class="btn-finish" @click="finishWorkout">Finish</button>
+          </div>
+          <div v-if="workout" class="exercise">
+            <h3>{{ workout.exercises[workout.current].name }}</h3>
+            <table class="set-grid">
+              <thead><tr><th>Set</th><th>Prev</th><th>kg</th><th>Reps</th><th>{{ effortScale === 'rir' ? 'RIR' : 'RPE' }}</th><th>✓</th></tr></thead>
+              <tbody>
+                <tr v-for="s in workout.exercises[workout.current].sets" :key="s.set_number" :class="{ done: s.done }">
+                  <td>{{ s.set_number }}</td>
+                  <td class="prev">{{ fmtPrev(s.prev) }}</td>
+                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done" /></td>
+                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done">✓</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="ex-nav">
+              <button class="btn-secondary" :disabled="workout.current === 0" @click="workout.current--">‹ Prev</button>
+              <span class="muted">{{ workout.current + 1 }}/{{ workout.exercises.length }}</span>
+              <button class="btn-secondary" :disabled="workout.current === workout.exercises.length - 1" @click="workout.current++">Next ›</button>
+            </div>
+          </div>
         </section>
         <section v-else-if="view === 'settings'">
           <h2>Settings</h2>

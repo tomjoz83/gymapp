@@ -15,3 +15,14 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .muted { color:var(--muted); } .error { color:#f87171; } .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; }
 .day-card { background:var(--panel); border-radius:12px; padding:16px; margin-bottom:10px; min-height:64px; }
 .day-name { font-size:16px; font-weight:700; margin-bottom:2px; }
+.workout-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.btn-finish { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:700; min-height:44px; }
+.set-grid { width:100%; border-collapse:collapse; }
+.set-grid th { font-size:10px; color:var(--muted); text-transform:uppercase; padding:4px 2px; }
+.set-grid td { text-align:center; padding:5px 3px; }
+.set-grid tr.done .cell { background:#1b3a2a; }
+.prev { color:#5f6673; font-size:11px; }
+.cell { width:56px; background:var(--panel); border:1px solid #2a2e37; border-radius:6px; color:var(--text); padding:8px 4px; font-size:15px; text-align:center; }
+.ck { width:44px; height:44px; border-radius:8px; border:none; background:#2a2e37; color:#3a4150; font-size:18px; }
+.ck.ok { background:var(--good); color:#04120a; }
+.ex-nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:8px; }

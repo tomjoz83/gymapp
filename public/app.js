@@ -76,9 +76,64 @@ createApp({
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
-    async function initWorkout(routine) {
-      // Task 4 fills this in (builds the set grid). Stub for now.
+    // Find the most recent PRIOR session's sets for an exercise (for prefill + "previous").
+    async function priorSetsFor(exerciseName) {
+      try {
+        const sessions = await api('/api/sessions');
+        for (const s of sessions) {
+          if (state.activeSession && s.id === state.activeSession.id) continue;
+          const full = await api(`/api/sessions/${s.id}`);
+          const matching = full.sets.filter((x) => x.exercise === exerciseName);
+          if (matching.length) return matching;
+        }
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+      return [];
     }
+
+    async function initWorkout(routine) {
+      const exercises = [];
+      for (const rx of routine.exercises) {
+        const prior = await priorSetsFor(rx.exercise);
+        const sets = [];
+        for (let i = 1; i <= (rx.target_sets || 1); i++) {
+          const pf = PTLogic.prefillForSet(prior, i, rx);
+          sets.push({
+            set_number: i,
+            prev: PTLogic.resolvePrevious(prior, i),
+            weight: pf.weight,
+            reps: pf.reps,
+            rpe: rx.target_rpe != null ? rx.target_rpe : null,
+            done: false,
+            logId: null,
+          });
+        }
+        exercises.push({ name: rx.exercise, rest_seconds: rx.rest_seconds || 90, sets });
+      }
+      state.workout = { exercises, current: 0 };
+    }
+
+    function startRest(seconds) { /* Task 5 implements the timer */ }
+
+    async function logSet(ex, set) {
+      try {
+        const row = await api(`/api/sessions/${state.activeSession.id}/sets`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exerciseName: ex.name,
+            setNumber: set.set_number,
+            weight: set.weight,
+            reps: set.reps,
+            rpe: set.rpe,
+          }),
+        });
+        set.done = true;
+        set.logId = row.id;
+        startRest(ex.rest_seconds);
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+
+    function finishWorkout() { /* Task 6 implements finish + PR toast */ state.view = 'home'; }
 
     async function startWorkout(routine) {
       try {
@@ -133,6 +188,11 @@ createApp({
 
     if (state.unlocked) loadActiveProgram();
 
-    return { ...toRefs(state), unlock, lock, saveEffortScale, loadWeek, startWorkout };
+    return {
+      ...toRefs(state),
+      unlock, lock, saveEffortScale, loadWeek, startWorkout,
+      logSet, finishWorkout,
+      fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
+    };
   },
 }).mount('#app');
