@@ -20,3 +20,9 @@ archive.json
 # OS / editor cruft
 .DS_Store
 *.swp
+
+# SQLite database (lives outside the repo in production)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
