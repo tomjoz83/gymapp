@@ -35,12 +35,14 @@ test('importProgram inserts program, weeks, routines, exercises', () => {
   closeDb();
 });
 
-test('importProgram upserts by slug (no duplicate)', () => {
+test('importProgram is idempotent by slug (no duplicate, no overwrite)', () => {
   const db = getDb(':memory:');
-  importProgram(db, sampleProgram(), '2026-07-13 12:00:00');
-  importProgram(db, sampleProgram({ name: 'PPL v2' }), '2026-07-14 12:00:00');
+  const id1 = importProgram(db, sampleProgram(), '2026-07-13 12:00:00');
+  // Re-importing a different name for the same slug is a no-op: existing rows preserved.
+  const id2 = importProgram(db, sampleProgram({ name: 'PPL v2' }), '2026-07-14 12:00:00');
+  assert.strictEqual(id2, id1, 'same id returned for existing slug');
   assert.strictEqual(db.prepare('SELECT COUNT(*) c FROM programs').get().c, 1);
-  assert.strictEqual(db.prepare('SELECT name FROM programs').get().name, 'PPL v2');
+  assert.strictEqual(db.prepare('SELECT name FROM programs').get().name, 'PPL', 'name is NOT overwritten');
   assert.strictEqual(db.prepare('SELECT COUNT(*) c FROM program_weeks').get().c, 1);
   assert.strictEqual(db.prepare('SELECT COUNT(*) c FROM routines').get().c, 2);
   closeDb();

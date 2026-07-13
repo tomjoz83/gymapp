@@ -71,20 +71,41 @@ function recomputePRs(db, exerciseId) {
   }
 }
 
+function assertNoDependentSessions(db, programId) {
+  const row = db.prepare(
+    `SELECT COUNT(*) c
+       FROM workout_sessions ws
+       JOIN routines r ON r.id = ws.routine_id
+       JOIN program_weeks w ON w.id = r.program_week_id
+      WHERE w.program_id = ?`
+  ).get(programId);
+  if (row.c > 0) {
+    throw new Error(
+      `Cannot delete program ${programId}: ${row.c} workout session(s) reference its routines.`
+    );
+  }
+}
+
 function importProgram(db, program, createdAt = null) {
   const result = validateProgram(program);
   if (!result.valid) {
     throw new Error('invalid program: ' + result.errors.join('; '));
   }
+
+  // Idempotent re-import: if this slug already exists, never destroy history.
+  const found = programExistsMatching(db, program);
+  if (found.id !== null) {
+    // Unchanged -> true no-op. Changed -> we still do not destructively rebuild,
+    // because programs are edited in-app, not by re-importing JSON. (Deferred:
+    // update-in-place / versioning.) Either way, keep existing rows and sessions.
+    return found.id;
+  }
+
   const stamp = createdAt || '1970-01-01 00:00:00';
   const isActive = program.active ? 1 : 0;
 
   db.exec('BEGIN');
   try {
-    const existing = db.prepare('SELECT id FROM programs WHERE slug = ?').get(program.slug);
-    if (existing) {
-      db.prepare('DELETE FROM programs WHERE id = ?').run(existing.id);
-    }
     const progInfo = db.prepare(
       'INSERT INTO programs (name, slug, description, active, created_at) VALUES (?, ?, ?, ?, ?)'
     ).run(program.name, program.slug, program.description || null, isActive, stamp);
@@ -248,5 +269,5 @@ function programExistsMatching(db, program) {
 
 module.exports = {
   findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
-  finishSession, updateSetLog, deleteSetLog, programExistsMatching,
+  finishSession, updateSetLog, deleteSetLog, programExistsMatching, assertNoDependentSessions,
 };
