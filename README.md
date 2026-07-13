@@ -12,6 +12,8 @@ Protected by a single shared passphrase.
   exists but can't be parsed makes the server error loudly rather than silently
   resetting to empty.
 
+As of Phase 3, the app is backed by SQLite (`DB_PATH`, default `./gym.db`; on the VPS `/home/tj/personal-trainer.db`) rather than `data.json`. Programs are loaded by `scripts/import-programs.js` on deploy; sessions and set logs are written by the API.
+
 ## Access / passphrase
 
 Every `/api` route requires a token, so the app can be exposed to the internet.
