@@ -43,5 +43,12 @@
     const s = Math.max(0, Math.floor(seconds || 0));
     return { remaining: s, running: s > 0 };
   }
-  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState };
+  function tickRest(state) {
+    // state: { remaining, running }. Returns a NEW state after one second.
+    if (!state.running) return state;
+    const remaining = state.remaining - 1;
+    if (remaining <= 0) return { remaining: 0, running: false, justFinished: true };
+    return { remaining, running: true };
+  }
+  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest };
 });

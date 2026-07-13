@@ -65,6 +65,7 @@ createApp({
       week: null,
       activeSession: null,
       workout: null,
+      rest: { remaining: 0, running: false },
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -122,7 +123,27 @@ createApp({
       state.workout = { exercises, current: 0 };
     }
 
-    function startRest(seconds) { /* Task 5 implements the timer */ }
+    let restInterval = null;
+    function stopRestInterval() { if (restInterval) { clearInterval(restInterval); restInterval = null; } }
+    function startRest(seconds) {
+      stopRestInterval();
+      state.rest = PTLogic.nextRestState(seconds);
+      if (!state.rest.running) return;
+      restInterval = setInterval(() => {
+        const next = PTLogic.tickRest(state.rest);
+        state.rest = { remaining: next.remaining, running: next.running };
+        if (next.justFinished) { beep(); if (navigator.vibrate) navigator.vibrate(400); stopRestInterval(); }
+      }, 1000);
+    }
+    function skipRest() { state.rest = { remaining: 0, running: false }; stopRestInterval(); }
+    function addRest(delta) { if (state.rest.running) state.rest = { remaining: Math.max(0, state.rest.remaining + delta), running: true }; }
+    function beep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator(); o.frequency.value = 880; o.connect(ctx.destination);
+        o.start(); o.stop(ctx.currentTime + 0.2);
+      } catch (e) { /* audio not available */ }
+    }
 
     async function logSet(ex, set) {
       try {
@@ -144,12 +165,14 @@ createApp({
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
-    function finishWorkout() { /* Task 6 implements finish + PR toast */ state.view = 'home'; }
+    function finishWorkout() { /* Task 6 implements finish + PR toast */ stopRestInterval(); state.rest = { remaining: 0, running: false }; state.view = 'home'; }
 
     // Return to Home WITHOUT finishing the session. Every logged set is already
     // persisted server-side (each ✓ posts immediately), so the open session is
     // left intact and can be resumed; nothing is lost.
     function leaveWorkout() {
+      stopRestInterval();
+      state.rest = { remaining: 0, running: false };
       state.view = 'home';
     }
 
@@ -210,6 +233,7 @@ createApp({
       ...toRefs(state),
       unlock, lock, saveEffortScale, loadWeek, startWorkout,
       logSet, finishWorkout, leaveWorkout,
+      skipRest, addRest,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },

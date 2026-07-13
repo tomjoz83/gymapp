@@ -77,6 +77,12 @@
               <span v-else class="muted last-ex">Last exercise</span>
             </div>
           </div>
+          <div v-if="rest.running" class="rest-bar">
+            <button class="btn-secondary" @click="addRest(-15)">−15</button>
+            <span class="rest-time">{{ Math.floor(rest.remaining/60) }}:{{ String(rest.remaining%60).padStart(2,'0') }}</span>
+            <button class="btn-secondary" @click="addRest(15)">+15</button>
+            <button class="btn-secondary" @click="skipRest">Skip</button>
+          </div>
         </section>
         <section v-else-if="view === 'settings'">
           <h2>Settings</h2>

@@ -40,3 +40,5 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .ex-chips .chip.on { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
 .ex-chips .chip.done { border-color:var(--good); color:var(--good); }
 .ex-chips .chip.on.done { background:var(--accent); color:#fff; }
+.rest-bar { position:fixed; bottom:64px; left:0; right:0; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#243044; border-top:1px solid #33507a; padding:10px 14px; z-index:5; }
+.rest-time { font-size:20px; font-weight:700; color:#8fb8ff; }
