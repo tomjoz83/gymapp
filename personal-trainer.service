@@ -11,6 +11,7 @@ Environment=PORT=3000
 # Data/archive live OUTSIDE the repo so the app can write without causing git conflicts.
 Environment=STORE_PATH=/home/tj/personal-trainer-data.json
 Environment=ARCHIVE_PATH=/home/tj/personal-trainer-archive.json
+Environment=DB_PATH=/home/tj/personal-trainer.db
 ExecStart=/home/tj/.local/bin/node /home/tj/apps/gymapp/server.js
 Restart=always
 RestartSec=3
