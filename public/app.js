@@ -70,6 +70,7 @@ createApp({
       readonly: false,
       exercises: [], progressDetail: null,
       startDateInput: '',
+      programDays: [], programDayDetail: null,
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -333,10 +334,26 @@ createApp({
         state.activeProgram = await api('/api/active-program');
         state.startDateInput = state.activeProgram.start_date || '';
         await buildCalendar();
+        await loadProgramDays();
       } catch (e) {
         if (!e.unauthorized) state.error = e.message;
       }
     }
+
+    // Read-only reference view of the active program's day-types (Push/Pull/…).
+    // Structure is week-independent for names+sets, so week 1 is canonical.
+    async function loadProgramDays() {
+      if (!state.activeProgram) { state.programDays = []; return; }
+      try {
+        const w = await api('/api/program/week?number=1');
+        state.programDays = (w.routines || []).map((r) => ({
+          name: r.name,
+          exercises: (r.exercises || []).map((e) => ({ exercise: e.exercise, target_sets: e.target_sets })),
+        }));
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+    function openProgramDay(day) { state.programDayDetail = day; }
+    function closeProgramDay() { state.programDayDetail = null; }
 
     async function unlock() {
       const t = state.tokenInput.trim();
@@ -400,6 +417,7 @@ createApp({
       pageWeek, openDay, cellStatus, buildCalendar,
       editReadonly,
       loadExercises, openProgress, closeProgress, progressSparkline,
+      openProgramDay, closeProgramDay,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },
