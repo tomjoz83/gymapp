@@ -70,5 +70,44 @@
     const p = _partsInTZ(tz, instant);
     return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
   }
-  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest, todayInTZ, nowInTZ };
+  var _DOW = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+  function dayOfWeekOffset(name) {
+    return Object.prototype.hasOwnProperty.call(_DOW, name) ? _DOW[name] : null;
+  }
+  function _mkUTC(ymd) { return new Date(ymd + 'T00:00:00Z'); }
+  function _fmtUTC(d) { return d.toISOString().slice(0, 10); }
+  function _addDays(ymd, n) { const d = _mkUTC(ymd); d.setUTCDate(d.getUTCDate() + n); return _fmtUTC(d); }
+  function _diffDays(a, b) { return Math.round((_mkUTC(a) - _mkUTC(b)) / 86400000); }
+
+  function slotDate(startDate, weekNumber, dayName) {
+    const off = dayOfWeekOffset(dayName);
+    if (off == null) return null;
+    return _addDays(startDate, 7 * (weekNumber - 1) + off);
+  }
+  function dateToSlot(startDate, weekCount, date) {
+    const delta = _diffDays(date, startDate);
+    if (delta < 0 || delta >= 7 * weekCount) return null;
+    return { weekNumber: Math.floor(delta / 7) + 1, dayOffset: delta % 7 };
+  }
+  function weekGrid(startDate, weekCount, anchorDate, routinesByDay) {
+    // Monday of the week containing anchorDate.
+    const delta = _diffDays(anchorDate, startDate);
+    const weekIdx = Math.floor(delta / 7); // may be negative or >= weekCount (out-of-program weeks)
+    const monday = _addDays(startDate, weekIdx * 7);
+    const names = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const cells = [];
+    for (let i = 0; i < 7; i++) {
+      const date = _addDays(monday, i);
+      const slot = dateToSlot(startDate, weekCount, date);
+      const routineName = slot ? (routinesByDay[names[i]] || null) : null;
+      cells.push({
+        date,
+        inProgram: !!slot,
+        weekNumber: slot ? slot.weekNumber : null,
+        routineName,
+      });
+    }
+    return cells;
+  }
+  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest, todayInTZ, nowInTZ, dayOfWeekOffset, slotDate, dateToSlot, weekGrid };
 });
