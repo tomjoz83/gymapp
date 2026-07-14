@@ -284,14 +284,18 @@ createApp({
     async function finishWorkout() {
       stopRestInterval();
       state.rest = { remaining: 0, running: false };
+      let finished = false;
       if (state.activeSession) {
-        try { await api(`/api/sessions/${state.activeSession.id}/finish`, { method: 'POST' }); }
-        catch (e) { if (!e.unauthorized) state.error = e.message; }
+        try {
+          await api(`/api/sessions/${state.activeSession.id}/finish`, { method: 'POST' });
+          finished = true;
+        } catch (e) { if (!e.unauthorized) state.error = e.message; }
       }
       state.activeSession = null;
       state.workout = null;
       state.view = 'home';
       await buildCalendar();
+      if (finished) showToast('✓ Workout saved and completed');
     }
 
     function showToast(msg) {
