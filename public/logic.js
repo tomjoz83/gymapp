@@ -50,5 +50,25 @@
     if (remaining <= 0) return { remaining: 0, running: false, justFinished: true };
     return { remaining, running: true };
   }
-  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest };
+  function _partsInTZ(tz, instant) {
+    const d = instant instanceof Date ? instant : new Date(instant);
+    const f = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    });
+    const p = {};
+    for (const { type, value } of f.formatToParts(d)) p[type] = value;
+    // en-CA gives 24h; guard the "24" hour edge some engines emit at midnight.
+    if (p.hour === '24') p.hour = '00';
+    return p;
+  }
+  function todayInTZ(tz, instant) {
+    const p = _partsInTZ(tz, instant);
+    return `${p.year}-${p.month}-${p.day}`;
+  }
+  function nowInTZ(tz, instant) {
+    const p = _partsInTZ(tz, instant);
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+  }
+  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest, todayInTZ, nowInTZ };
 });
