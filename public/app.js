@@ -45,12 +45,6 @@ function formatElapsed(totalSeconds) {
   return `${h}:${m}:${s}`;
 }
 
-function isoLocal(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 createApp({
   setup() {
@@ -63,7 +57,6 @@ createApp({
       error: '',
       view: 'home',
       activeProgram: null,
-      currentWeek: 1,
       effortScale: localStorage.getItem('pt_effort_scale') || 'rpe',
       week: null,
       activeSession: null,
@@ -76,16 +69,10 @@ createApp({
       _routinesByDay: null,
       readonly: false,
       exercises: [], progressDetail: null,
+      startDateInput: '',
     });
 
     onUnauthorized = () => { state.unlocked = false; };
-
-    async function loadWeek() {
-      if (!state.activeProgram) return;
-      try {
-        state.week = await api(`/api/program/week?number=${state.currentWeek}`);
-      } catch (e) { if (!e.unauthorized) state.error = e.message; }
-    }
 
     async function buildCalendar() {
       if (!state.activeProgram || !state.activeProgram.start_date) { state.calendar = []; return; }
@@ -321,22 +308,24 @@ createApp({
       state.view = 'home';
     }
 
-    async function startWorkout(routine) {
+    async function saveStartDate() {
+      const d = state.startDateInput;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { state.error = 'Enter a valid date (YYYY-MM-DD)'; return; }
       try {
-        const { id } = await api('/api/sessions', {
-          method: 'POST',
+        await api(`/api/program/${state.activeProgram.id}/start-date`, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ routineId: routine.id }),
+          body: JSON.stringify({ start_date: d }),
         });
-        state.activeSession = { id, routine };
-        state.view = 'workout';
-        await initWorkout(routine);
+        state.activeProgram.start_date = d;
+        await buildCalendar();
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
     async function loadActiveProgram() {
       try {
         state.activeProgram = await api('/api/active-program');
+        state.startDateInput = state.activeProgram.start_date || '';
         await buildCalendar();
       } catch (e) {
         if (!e.unauthorized) state.error = e.message;
@@ -399,7 +388,7 @@ createApp({
 
     return {
       ...toRefs(state),
-      unlock, lock, saveEffortScale, loadWeek, startWorkout,
+      unlock, lock, saveEffortScale, saveStartDate,
       logSet, finishWorkout, leaveWorkout,
       skipRest, addRest,
       pageWeek, openDay, cellStatus, buildCalendar,

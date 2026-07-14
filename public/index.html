@@ -127,6 +127,14 @@
               <option value="rir">RIR (0–5)</option>
             </select>
           </label>
+          <div v-if="activeProgram" class="setting-group">
+            <h3 class="setting-heading">Program start date</h3>
+            <p class="muted setting-hint">Week 1 of <strong>{{ activeProgram.name }}</strong> begins on this Monday.</p>
+            <label class="row">Start date
+              <input type="date" v-model="startDateInput" class="date-input" />
+            </label>
+            <button class="btn-primary" @click="saveStartDate">Save start date</button>
+          </div>
           <button class="btn-secondary" @click="lock">Lock app</button>
         </section>
       </main>
