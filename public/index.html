@@ -28,14 +28,21 @@
       <div v-if="toast" class="toast">{{ toast }}</div>
       <main class="view">
         <section v-if="view === 'home'">
-          <h2>Home</h2>
+          <h2>This Week</h2>
           <p v-if="!activeProgram" class="muted">No active program. Load one via the program loader.</p>
+          <p v-else-if="!activeProgram.start_date" class="muted">Set a start date for {{ activeProgram.name }} in Settings to see your calendar.</p>
           <div v-else>
-            <p class="muted">{{ activeProgram.name }} · Week {{ currentWeek }}/{{ activeProgram.weekCount }}</p>
-            <div v-if="week">
-              <div v-for="r in week.routines" :key="r.id" class="day-card" @click="startWorkout(r)">
-                <div class="day-name">{{ r.name }}</div>
-                <div class="muted">{{ r.day_of_week }} · {{ r.exercises.length }} exercises</div>
+            <div class="cal-nav">
+              <button class="btn-secondary" @click="pageWeek(-7)">‹</button>
+              <span class="cal-range muted">{{ calendar.length ? calendar[0].date + ' – ' + calendar[6].date : '' }}</span>
+              <button class="btn-secondary" @click="pageWeek(7)">›</button>
+            </div>
+            <div class="cal-grid">
+              <div v-for="cell in calendar" :key="cell.date"
+                   class="cal-cell" :class="'st-' + cellStatus(cell)" @click="openDay(cell)">
+                <div class="cal-date">{{ cell.date.slice(8) }}/{{ cell.date.slice(5,7) }}</div>
+                <div class="cal-routine">{{ cell.routineName || (cell.inProgram ? 'Rest' : '·') }}</div>
+                <div class="cal-dot"></div>
               </div>
             </div>
           </div>

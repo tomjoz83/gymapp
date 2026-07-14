@@ -54,6 +54,9 @@ function isoLocal(date) {
 
 createApp({
   setup() {
+    const APP_TZ = 'Pacific/Auckland';
+    function todayStr() { return PTLogic.todayInTZ(APP_TZ, new Date()); }
+
     const state = reactive({
       unlocked: !!authToken,
       tokenInput: '',
@@ -67,6 +70,10 @@ createApp({
       workout: null,
       rest: { remaining: 0, running: false },
       toast: '',
+      anchorDate: null,
+      calendar: [],
+      sessionsByDate: {},
+      _routinesByDay: null,
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -77,6 +84,52 @@ createApp({
         state.week = await api(`/api/program/week?number=${state.currentWeek}`);
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
+
+    async function buildCalendar() {
+      if (!state.activeProgram || !state.activeProgram.start_date) { state.calendar = []; return; }
+      if (!state.anchorDate) state.anchorDate = todayStr();
+      // routinesByDay: fetch week 1 once for the day_of_week → routine name map (same every week).
+      let routinesByDay = state._routinesByDay;
+      if (!routinesByDay) {
+        const w = await api('/api/program/week?number=1');
+        routinesByDay = {};
+        for (const r of (w.routines || [])) routinesByDay[r.day_of_week] = r.name;
+        state._routinesByDay = routinesByDay;
+      }
+      // sessions keyed by date (YYYY-MM-DD) for status dots.
+      const sessions = await api('/api/sessions');
+      const byDate = {};
+      for (const s of sessions) {
+        const d = String(s.started_at).slice(0, 10);
+        // keep the "best" session per date: finished > in-progress; with sets > empty
+        const prev = byDate[d];
+        const score = (s.finished_at ? 2 : 0) + (s.set_count > 0 ? 1 : 0);
+        if (!prev || score > prev._score) byDate[d] = { ...s, _score: score };
+      }
+      state.sessionsByDate = byDate;
+      state.calendar = PTLogic.weekGrid(
+        state.activeProgram.start_date,
+        state.activeProgram.weekCount,
+        state.anchorDate,
+        routinesByDay
+      );
+    }
+    function cellStatus(cell) {
+      const s = state.sessionsByDate[cell.date];
+      if (s && s.finished_at) return 'done';
+      if (s) return 'in-progress';
+      if (!cell.inProgram) return 'rest';
+      if (cell.date < todayStr()) return 'missed';
+      if (cell.date === todayStr()) return 'today';
+      return 'upcoming';
+    }
+    function pageWeek(deltaDays) {
+      const d = new Date(state.anchorDate + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() + deltaDays);
+      state.anchorDate = d.toISOString().slice(0, 10);
+      buildCalendar();
+    }
+    function openDay(cell) { /* implemented in Task 10 */ console.log('openDay', cell); }
 
     // Fetch prior sessions' full set data ONCE, newest first, excluding the active session.
     async function loadPriorSessions() {
@@ -186,7 +239,7 @@ createApp({
       state.activeSession = null;
       state.workout = null;
       state.view = 'home';
-      await loadWeek();
+      await buildCalendar();
     }
 
     function showToast(msg) {
@@ -219,7 +272,7 @@ createApp({
     async function loadActiveProgram() {
       try {
         state.activeProgram = await api('/api/active-program');
-        await loadWeek();
+        await buildCalendar();
       } catch (e) {
         if (!e.unauthorized) state.error = e.message;
       }
@@ -261,6 +314,7 @@ createApp({
       unlock, lock, saveEffortScale, loadWeek, startWorkout,
       logSet, finishWorkout, leaveWorkout,
       skipRest, addRest,
+      pageWeek, openDay, cellStatus, buildCalendar,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },
