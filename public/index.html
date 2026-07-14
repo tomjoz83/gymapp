@@ -28,24 +28,54 @@
       <div v-if="toast" class="toast">{{ toast }}</div>
       <main class="view">
         <section v-if="view === 'home'">
-          <h2>Home</h2>
+          <h2>This Week</h2>
           <p v-if="!activeProgram" class="muted">No active program. Load one via the program loader.</p>
+          <p v-else-if="!activeProgram.start_date" class="muted">Set a start date for {{ activeProgram.name }} in Settings to see your calendar.</p>
           <div v-else>
-            <p class="muted">{{ activeProgram.name }} · Week {{ currentWeek }}/{{ activeProgram.weekCount }}</p>
-            <div v-if="week">
-              <div v-for="r in week.routines" :key="r.id" class="day-card" @click="startWorkout(r)">
-                <div class="day-name">{{ r.name }}</div>
-                <div class="muted">{{ r.day_of_week }} · {{ r.exercises.length }} exercises</div>
+            <div class="cal-nav">
+              <button class="btn-secondary" @click="pageWeek(-7)">‹</button>
+              <span class="cal-range muted">{{ calendar.length ? calendar[0].date + ' – ' + calendar[6].date : '' }}</span>
+              <button class="btn-secondary" @click="pageWeek(7)">›</button>
+            </div>
+            <div class="cal-grid">
+              <div v-for="cell in calendar" :key="cell.date"
+                   class="cal-cell" :class="'st-' + cellStatus(cell)" @click="openDay(cell)">
+                <div class="cal-date">{{ cell.date.slice(8) }}/{{ cell.date.slice(5,7) }}</div>
+                <div class="cal-routine">{{ cell.routineName || (cell.inProgram ? 'Rest' : '·') }}</div>
+                <div class="cal-dot"></div>
               </div>
             </div>
           </div>
         </section>
-        <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
+        <section v-else-if="view === 'progress'">
+          <h2>Progress</h2>
+          <div v-if="!progressDetail">
+            <p v-if="!exercises.length" class="muted">No logged exercises yet.</p>
+            <div v-for="e in exercises" :key="e.name" class="day-card" @click="openProgress(e.name)">
+              <div class="day-name">{{ e.name }}</div>
+              <div class="muted">{{ e.session_count }} sessions · last {{ e.last_date }}</div>
+            </div>
+          </div>
+          <div v-else class="prog-detail">
+            <button class="btn-back" @click="closeProgress">‹ Exercises</button>
+            <h3>{{ progressDetail.exercise }}</h3>
+            <svg v-if="progressDetail.history.length >= 2" class="spark" viewBox="0 0 280 60" preserveAspectRatio="none">
+              <polyline :points="progressSparkline(progressDetail.history)" fill="none" stroke="#58a6ff" stroke-width="2" />
+            </svg>
+            <p class="muted" v-if="progressDetail.pr">PR: {{ progressDetail.pr.best_weight }}kg · est 1RM {{ Math.round(progressDetail.pr.best_est_1rm) }}kg</p>
+            <table class="set-grid"><thead><tr><th>Date</th><th>Top</th><th>est 1RM</th><th>Vol</th></tr></thead>
+              <tbody><tr v-for="(h,i) in progressDetail.history.slice().reverse()" :key="i">
+                <td>{{ h.date }}</td><td>{{ h.top_weight }}</td><td>{{ Math.round(h.est_1rm) }}</td><td>{{ Math.round(h.volume) }}</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </section>
         <section v-else-if="view === 'workout'">
           <div class="workout-top">
             <button class="btn-back" @click="leaveWorkout">‹ Back</button>
-            <span class="muted">{{ activeSession && activeSession.routine.name }}</span>
-            <button class="btn-finish" @click="finishWorkout">Finish</button>
+            <span class="muted">{{ activeSession && activeSession.routine.name }}<span v-if="readonly"> · read-only</span></span>
+            <button v-if="readonly" class="btn-secondary" @click="editReadonly">Edit</button>
+            <button v-else class="btn-finish" @click="finishWorkout">Finish</button>
           </div>
           <div v-if="workout" class="exercise">
             <div class="ex-progress">
@@ -63,10 +93,14 @@
                 <tr v-for="s in workout.exercises[workout.current].sets" :key="s.set_number" :class="{ done: s.done }">
                   <td>{{ s.set_number }}</td>
                   <td class="prev">{{ fmtPrev(s.prev) }}</td>
-                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done" /></td>
-                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done" /></td>
-                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done" /></td>
-                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button></td>
+                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done || readonly" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done || readonly" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done || readonly" /></td>
+                  <td>
+                    <span v-if="readonly && s.done" class="ck ok static">✓</span>
+                    <span v-else-if="readonly" class="ck static muted">·</span>
+                    <button v-else class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -93,12 +127,20 @@
               <option value="rir">RIR (0–5)</option>
             </select>
           </label>
+          <div v-if="activeProgram" class="setting-group">
+            <h3 class="setting-heading">Program start date</h3>
+            <p class="muted setting-hint">Week 1 of <strong>{{ activeProgram.name }}</strong> begins on this Monday.</p>
+            <label class="row">Start date
+              <input type="date" v-model="startDateInput" class="date-input" />
+            </label>
+            <button class="btn-primary" @click="saveStartDate">Save start date</button>
+          </div>
           <button class="btn-secondary" @click="lock">Lock app</button>
         </section>
       </main>
       <nav class="tabbar">
         <button :class="{ active: view === 'home' }" @click="view = 'home'"><span class="ic">🏠</span>Home</button>
-        <button :class="{ active: view === 'progress' }" @click="view = 'progress'"><span class="ic">📈</span>Progress</button>
+        <button :class="{ active: view === 'progress' }" @click="view = 'progress'; loadExercises()"><span class="ic">📈</span>Progress</button>
         <button :class="{ active: view === 'settings' }" @click="view = 'settings'"><span class="ic">⚙️</span>Settings</button>
       </nav>
     </div>

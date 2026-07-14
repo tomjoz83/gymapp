@@ -4,8 +4,10 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const express = require('express');
 const { getDb } = require('./db');
-const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise } = require('./store');
-const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress } = require('./read-queries');
+const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise, findOrCreateSessionForSlot, setProgramStartDate } = require('./store');
+const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, listLoggedExercises } = require('./read-queries');
+const PTLogic = require('./public/logic.js');
+const APP_TZ = process.env.APP_TZ || 'Pacific/Auckland';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,24 +56,12 @@ app.use('/api', (req, res, next) => {
   res.status(401).json({ error: 'unauthorized' });
 });
 
-// Local "YYYY-MM-DD HH:mm:ss" timestamp (consistent with isoLocal dates).
-function isoLocal(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 function todayIso() {
-  return isoLocal(new Date());
+  return PTLogic.todayInTZ(APP_TZ, new Date());
 }
 
 function nowStamp() {
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  const ss = String(d.getSeconds()).padStart(2, '0');
-  return `${isoLocal(d)} ${hh}:${mm}:${ss}`;
+  return PTLogic.nowInTZ(APP_TZ, new Date());
 }
 
 // ===== SQLite-backed API routes =====
@@ -87,6 +77,12 @@ app.get('/api/program/week', (req, res) => {
   res.json(week);
 });
 
+app.put('/api/program/:id/start-date', (req, res) => {
+  const b = req.body || {};
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.start_date || ''))) return res.status(400).json({ error: 'start_date must be YYYY-MM-DD' });
+  res.json(setProgramStartDate(getDb(), Number(req.params.id), b.start_date));
+});
+
 app.get('/api/sessions', (req, res) => {
   res.json(listSessions(getDb()));
 });
@@ -98,8 +94,17 @@ app.get('/api/sessions/:id', (req, res) => {
 });
 
 app.post('/api/sessions', (req, res) => {
-  const routineId = req.body && req.body.routineId != null ? Number(req.body.routineId) : null;
-  const id = createSession(getDb(), { routineId, startedAt: nowStamp() });
+  const b = req.body || {};
+  const routineId = b.routineId != null ? Number(b.routineId) : null;
+  const date = typeof b.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.date) ? b.date : null;
+  const db = getDb();
+  if (routineId != null && date != null) {
+    const today = todayIso();
+    const startedAt = date === today ? nowStamp() : `${date} 12:00:00`;
+    const { id, created } = findOrCreateSessionForSlot(db, { routineId, date, startedAt });
+    return res.status(created ? 201 : 200).json({ id, created });
+  }
+  const id = createSession(db, { routineId, startedAt: nowStamp() });
   res.status(201).json({ id });
 });
 
@@ -136,6 +141,10 @@ app.post('/api/sessions/:id/finish', (req, res) => {
   const result = finishSession(getDb(), Number(req.params.id), nowStamp());
   if (!result) return res.status(404).json({ error: 'session not found' });
   res.json(result);
+});
+
+app.get('/api/exercises', (req, res) => {
+  res.json(listLoggedExercises(getDb()));
 });
 
 app.get('/api/progress/:exercise', (req, res) => {

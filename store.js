@@ -273,7 +273,27 @@ function programExistsMatching(db, program) {
   return { match: a === b, id: stored.id };
 }
 
+function findOrCreateSessionForSlot(db, { routineId, date, startedAt = null }) {
+  // Inline the slot-lookup query (do NOT require read-queries — it already requires store,
+  // and a circular require would create a dependency cycle).
+  const existing = db.prepare(
+    `SELECT id FROM workout_sessions
+      WHERE routine_id = ? AND substr(started_at, 1, 10) = ?
+      ORDER BY id DESC LIMIT 1`
+  ).get(routineId, date);
+  if (existing) return { id: existing.id, created: false };
+  const stamp = startedAt || `${date} 12:00:00`;
+  const id = createSession(db, { routineId, startedAt: stamp });
+  return { id, created: true };
+}
+
+function setProgramStartDate(db, programId, date) {
+  db.prepare('UPDATE programs SET start_date = ? WHERE id = ?').run(date, programId);
+  return { id: programId, start_date: date };
+}
+
 module.exports = {
   findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
   finishSession, updateSetLog, deleteSetLog, programExistsMatching, assertNoDependentSessions,
+  findOrCreateSessionForSlot, setProgramStartDate,
 };

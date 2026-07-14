@@ -45,45 +45,150 @@ function formatElapsed(totalSeconds) {
   return `${h}:${m}:${s}`;
 }
 
-function isoLocal(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
 
 createApp({
   setup() {
+    const APP_TZ = 'Pacific/Auckland';
+    function todayStr() { return PTLogic.todayInTZ(APP_TZ, new Date()); }
+
     const state = reactive({
       unlocked: !!authToken,
       tokenInput: '',
       error: '',
       view: 'home',
       activeProgram: null,
-      currentWeek: 1,
       effortScale: localStorage.getItem('pt_effort_scale') || 'rpe',
       week: null,
       activeSession: null,
       workout: null,
       rest: { remaining: 0, running: false },
       toast: '',
+      anchorDate: null,
+      calendar: [],
+      sessionsByDate: {},
+      _routinesByDay: null,
+      readonly: false,
+      exercises: [], progressDetail: null,
+      startDateInput: '',
     });
 
     onUnauthorized = () => { state.unlocked = false; };
 
-    async function loadWeek() {
-      if (!state.activeProgram) return;
+    async function buildCalendar() {
+      if (!state.activeProgram || !state.activeProgram.start_date) { state.calendar = []; return; }
       try {
-        state.week = await api(`/api/program/week?number=${state.currentWeek}`);
-      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+        if (!state.anchorDate) state.anchorDate = todayStr();
+        // routinesByDay: fetch week 1 once for the day_of_week → routine name map (same every week).
+        let routinesByDay = state._routinesByDay;
+        if (!routinesByDay) {
+          const w = await api('/api/program/week?number=1');
+          routinesByDay = {};
+          for (const r of (w.routines || [])) routinesByDay[r.day_of_week] = r.name;
+          state._routinesByDay = routinesByDay;
+        }
+        // sessions keyed by date (YYYY-MM-DD) for status dots.
+        const sessions = await api('/api/sessions');
+        const byDate = {};
+        for (const s of sessions) {
+          const d = String(s.started_at).slice(0, 10);
+          // keep the "best" session per date: finished > in-progress; with sets > empty
+          const prev = byDate[d];
+          const score = (s.finished_at ? 2 : 0) + (s.set_count > 0 ? 1 : 0);
+          if (!prev || score > prev._score) byDate[d] = { ...s, _score: score };
+        }
+        state.sessionsByDate = byDate;
+        state.calendar = PTLogic.weekGrid(
+          state.activeProgram.start_date,
+          state.activeProgram.weekCount,
+          state.anchorDate,
+          routinesByDay
+        );
+      } catch (e) { state.error = e.message || String(e); }
     }
+    function cellStatus(cell) {
+      const s = state.sessionsByDate[cell.date];
+      if (s && s.finished_at) return 'done';
+      if (s) return 'in-progress';
+      if (!cell.inProgram) return 'rest';
+      if (cell.date < todayStr()) return 'missed';
+      if (cell.date === todayStr()) return 'today';
+      return 'upcoming';
+    }
+    function pageWeek(deltaDays) {
+      const d = new Date(state.anchorDate + 'T00:00:00Z');
+      d.setUTCDate(d.getUTCDate() + deltaDays);
+      state.anchorDate = d.toISOString().slice(0, 10);
+      buildCalendar();
+    }
+    function routineForCell(cell) {
+      // find the routine object for this cell's week+day from the week payload
+      return (state.week && state.week.routines || []).find((r) => r.name === cell.routineName) || null;
+    }
+    async function loadWeekForCell(cell) {
+      const slot = PTLogic.dateToSlot(state.activeProgram.start_date, state.activeProgram.weekCount, cell.date);
+      if (!slot) return null;
+      state.week = await api(`/api/program/week?number=${slot.weekNumber}`);
+      return routineForCell(cell);
+    }
+    function hydrateFromSession(routine, full, editable) {
+      // Build the workout grid, marking logged sets done; extra target sets appended as blank (editable only).
+      const priorByExercise = {};
+      for (const s of full.sets) (priorByExercise[s.exercise] = priorByExercise[s.exercise] || []).push(s);
+      const exercises = [];
+      for (const rx of routine.exercises) {
+        const logged = (priorByExercise[rx.exercise] || []).sort((a, b) => a.set_number - b.set_number);
+        const sets = [];
+        const target = rx.target_sets || logged.length || 1;
+        for (let i = 1; i <= Math.max(target, logged.length); i++) {
+          const done = logged.find((x) => x.set_number === i);
+          sets.push(done
+            ? { set_number: i, prev: null, weight: done.weight, reps: done.reps, rpe: done.rpe, done: !!done.is_complete, logId: done.id }
+            : { set_number: i, prev: null, weight: null, reps: null, rpe: rx.target_rpe != null ? rx.target_rpe : null, done: false, logId: null });
+        }
+        exercises.push({ name: rx.exercise, rest_seconds: rx.rest_seconds || 90, sets });
+      }
+      state.workout = { exercises, current: 0 };
+      state.readonly = !editable;
+    }
+    async function openDay(cell) {
+      if (!cell.inProgram) { showToast('Rest day'); return; }
+      const routine = await loadWeekForCell(cell);
+      if (!routine) { showToast('No routine'); return; }
+      const sessions = await api('/api/sessions');
+      const slotSession = sessions.find((s) => String(s.started_at).slice(0, 10) === cell.date && s.routine_name === routine.name) || null;
+      if (slotSession && slotSession.finished_at) {
+        const full = await api(`/api/sessions/${slotSession.id}`);
+        state.activeSession = { id: slotSession.id, routine };
+        hydrateFromSession(routine, full, false); // read-only
+        state.view = 'workout';
+        return;
+      }
+      if (slotSession) { // unfinished → resume editable
+        const full = await api(`/api/sessions/${slotSession.id}`);
+        state.activeSession = { id: slotSession.id, routine };
+        hydrateFromSession(routine, full, true);
+        state.view = 'workout';
+        return;
+      }
+      // none → start (idempotent per slot)
+      const resp = await api('/api/sessions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ routineId: routine.id, date: cell.date }),
+      });
+      state.activeSession = { id: resp.id, routine };
+      state.readonly = false;
+      await initWorkout(routine); // existing Phase-3b builder (prefill), now program-scoped (below)
+      state.view = 'workout';
+    }
+    function editReadonly() { state.readonly = false; }
 
     // Fetch prior sessions' full set data ONCE, newest first, excluding the active session.
     async function loadPriorSessions() {
       const result = [];
       try {
         const sessions = await api('/api/sessions'); // most recent first
-        for (const s of sessions) {
+        const scoped = sessions.filter((s) => !state.activeProgram || s.program_id === state.activeProgram.id);
+        for (const s of scoped) {
           if (state.activeSession && s.id === state.activeSession.id) continue;
           const full = await api(`/api/sessions/${s.id}`);
           result.push(full);
@@ -186,7 +291,7 @@ createApp({
       state.activeSession = null;
       state.workout = null;
       state.view = 'home';
-      await loadWeek();
+      await buildCalendar();
     }
 
     function showToast(msg) {
@@ -203,23 +308,25 @@ createApp({
       state.view = 'home';
     }
 
-    async function startWorkout(routine) {
+    async function saveStartDate() {
+      const d = state.startDateInput;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { state.error = 'Enter a valid date (YYYY-MM-DD)'; return; }
       try {
-        const { id } = await api('/api/sessions', {
-          method: 'POST',
+        await api(`/api/program/${state.activeProgram.id}/start-date`, {
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ routineId: routine.id }),
+          body: JSON.stringify({ start_date: d }),
         });
-        state.activeSession = { id, routine };
-        state.view = 'workout';
-        await initWorkout(routine);
+        state.activeProgram.start_date = d;
+        await buildCalendar();
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
     async function loadActiveProgram() {
       try {
         state.activeProgram = await api('/api/active-program');
-        await loadWeek();
+        state.startDateInput = state.activeProgram.start_date || '';
+        await buildCalendar();
       } catch (e) {
         if (!e.unauthorized) state.error = e.message;
       }
@@ -254,13 +361,39 @@ createApp({
       localStorage.setItem('pt_effort_scale', state.effortScale);
     }
 
+    async function loadExercises() {
+      try { state.exercises = await api('/api/exercises'); } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+    async function openProgress(name) {
+      try {
+        const p = await api(`/api/progress/${encodeURIComponent(name)}`);
+        p.history = (p.history || []).filter((h) => h.est_1rm > 0);
+        if (p.pr && !(p.pr.best_est_1rm > 0)) p.pr = null;
+        state.progressDetail = { exercise: name, ...p };
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+    function progressSparkline(history) {
+      const vals = (history || []).map((h) => h.est_1rm);
+      if (vals.length < 2) return '';
+      const max = Math.max(...vals), min = Math.min(...vals), span = max - min || 1;
+      return vals.map((v, i) => {
+        const x = (i / (vals.length - 1)) * 280;
+        const y = 60 - ((v - min) / span) * 56 - 2;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+    }
+    function closeProgress() { state.progressDetail = null; }
+
     if (state.unlocked) loadActiveProgram();
 
     return {
       ...toRefs(state),
-      unlock, lock, saveEffortScale, loadWeek, startWorkout,
+      unlock, lock, saveEffortScale, saveStartDate,
       logSet, finishWorkout, leaveWorkout,
       skipRest, addRest,
+      pageWeek, openDay, cellStatus, buildCalendar,
+      editReadonly,
+      loadExercises, openProgress, closeProgress, progressSparkline,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },

@@ -4,13 +4,13 @@ const { est1RM } = require('./store');
 
 function getActiveProgram(db) {
   const p = db.prepare(
-    'SELECT id, name, slug, description FROM programs WHERE active = 1'
+    'SELECT id, name, slug, description, start_date FROM programs WHERE active = 1'
   ).get();
   if (!p) return null;
   const weekCount = db.prepare(
     'SELECT COUNT(*) c FROM program_weeks WHERE program_id = ?'
   ).get(p.id).c;
-  return { id: p.id, name: p.name, slug: p.slug, description: p.description, weekCount };
+  return { id: p.id, name: p.name, slug: p.slug, description: p.description, start_date: p.start_date, weekCount };
 }
 
 function getProgramWeek(db, weekNumber) {
@@ -40,9 +40,11 @@ function listSessions(db) {
   return db.prepare(
     `SELECT ws.id, ws.started_at, ws.finished_at,
             r.name AS routine_name,
+            w.program_id AS program_id,
             (SELECT COUNT(*) FROM set_logs sl WHERE sl.session_id = ws.id) AS set_count
        FROM workout_sessions ws
        LEFT JOIN routines r ON r.id = ws.routine_id
+       LEFT JOIN program_weeks w ON w.id = r.program_week_id
       ORDER BY ws.started_at DESC, ws.id DESC`
   ).all();
 }
@@ -85,4 +87,27 @@ function getProgress(db, exerciseName) {
   return { exercise: exerciseName, history: Array.from(bySession.values()), pr };
 }
 
-module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress };
+function findSessionForSlot(db, { routineId, date }) {
+  const row = db.prepare(
+    `SELECT id, started_at, finished_at FROM workout_sessions
+      WHERE routine_id = ? AND substr(started_at, 1, 10) = ?
+      ORDER BY id DESC LIMIT 1`
+  ).get(routineId, date);
+  return row || null;
+}
+
+function listLoggedExercises(db) {
+  return db.prepare(
+    `SELECT e.name AS name,
+            COUNT(DISTINCT sl.session_id) AS session_count,
+            MAX(substr(ws.started_at,1,10)) AS last_date
+       FROM set_logs sl
+       JOIN exercises e ON e.id = sl.exercise_id
+       JOIN workout_sessions ws ON ws.id = sl.session_id
+      WHERE sl.is_warmup = 0 AND sl.weight IS NOT NULL
+      GROUP BY e.id
+      ORDER BY last_date DESC, e.name ASC`
+  ).all();
+}
+
+module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot, listLoggedExercises };
