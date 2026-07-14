@@ -311,6 +311,7 @@ createApp({
     async function saveStartDate() {
       const d = state.startDateInput;
       if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { state.error = 'Enter a valid date (YYYY-MM-DD)'; return; }
+      state.error = '';
       try {
         await api(`/api/program/${state.activeProgram.id}/start-date`, {
           method: 'PUT',
@@ -319,6 +320,7 @@ createApp({
         });
         state.activeProgram.start_date = d;
         await buildCalendar();
+        showToast(`✓ Start date saved: ${d}`);
       } catch (e) { if (!e.unauthorized) state.error = e.message; }
     }
 
