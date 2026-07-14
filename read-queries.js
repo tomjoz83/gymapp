@@ -85,4 +85,13 @@ function getProgress(db, exerciseName) {
   return { exercise: exerciseName, history: Array.from(bySession.values()), pr };
 }
 
-module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress };
+function findSessionForSlot(db, { routineId, date }) {
+  const row = db.prepare(
+    `SELECT id, started_at, finished_at FROM workout_sessions
+      WHERE routine_id = ? AND substr(started_at, 1, 10) = ?
+      ORDER BY id DESC LIMIT 1`
+  ).get(routineId, date);
+  return row || null;
+}
+
+module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot };
