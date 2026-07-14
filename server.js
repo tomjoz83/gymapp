@@ -4,7 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const express = require('express');
 const { getDb } = require('./db');
-const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise, findOrCreateSessionForSlot } = require('./store');
+const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise, findOrCreateSessionForSlot, setProgramStartDate } = require('./store');
 const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress } = require('./read-queries');
 const PTLogic = require('./public/logic.js');
 const APP_TZ = process.env.APP_TZ || 'Pacific/Auckland';
@@ -75,6 +75,12 @@ app.get('/api/program/week', (req, res) => {
   const week = getProgramWeek(getDb(), n);
   if (!week) return res.status(404).json({ error: 'week not found' });
   res.json(week);
+});
+
+app.put('/api/program/:id/start-date', (req, res) => {
+  const b = req.body || {};
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.start_date || ''))) return res.status(400).json({ error: 'start_date must be YYYY-MM-DD' });
+  res.json(setProgramStartDate(getDb(), Number(req.params.id), b.start_date));
 });
 
 app.get('/api/sessions', (req, res) => {

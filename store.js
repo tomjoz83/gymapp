@@ -287,8 +287,13 @@ function findOrCreateSessionForSlot(db, { routineId, date, startedAt = null }) {
   return { id, created: true };
 }
 
+function setProgramStartDate(db, programId, date) {
+  db.prepare('UPDATE programs SET start_date = ? WHERE id = ?').run(date, programId);
+  return { id: programId, start_date: date };
+}
+
 module.exports = {
   findOrCreateExercise, est1RM, createSession, logSet, recomputePRs, importProgram,
   finishSession, updateSetLog, deleteSetLog, programExistsMatching, assertNoDependentSessions,
-  findOrCreateSessionForSlot,
+  findOrCreateSessionForSlot, setProgramStartDate,
 };

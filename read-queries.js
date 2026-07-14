@@ -4,13 +4,13 @@ const { est1RM } = require('./store');
 
 function getActiveProgram(db) {
   const p = db.prepare(
-    'SELECT id, name, slug, description FROM programs WHERE active = 1'
+    'SELECT id, name, slug, description, start_date FROM programs WHERE active = 1'
   ).get();
   if (!p) return null;
   const weekCount = db.prepare(
     'SELECT COUNT(*) c FROM program_weeks WHERE program_id = ?'
   ).get(p.id).c;
-  return { id: p.id, name: p.name, slug: p.slug, description: p.description, weekCount };
+  return { id: p.id, name: p.name, slug: p.slug, description: p.description, start_date: p.start_date, weekCount };
 }
 
 function getProgramWeek(db, weekNumber) {
@@ -40,9 +40,11 @@ function listSessions(db) {
   return db.prepare(
     `SELECT ws.id, ws.started_at, ws.finished_at,
             r.name AS routine_name,
+            w.program_id AS program_id,
             (SELECT COUNT(*) FROM set_logs sl WHERE sl.session_id = ws.id) AS set_count
        FROM workout_sessions ws
        LEFT JOIN routines r ON r.id = ws.routine_id
+       LEFT JOIN program_weeks w ON w.id = r.program_week_id
       ORDER BY ws.started_at DESC, ws.id DESC`
   ).all();
 }
