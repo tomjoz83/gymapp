@@ -77,3 +77,5 @@ pass 92 / fail 0   (87 baseline + 5 migration tests)
 ```
 
 Idempotency test: PASSES — confirmed no double-shift.
+
+**Fix (backup-path alignment):** CLI block now computes `const dbPath = process.env.DB_PATH || './gym.db'` once and passes it explicitly to `getDb(dbPath)` so backup and opened DB are guaranteed to be the same file.

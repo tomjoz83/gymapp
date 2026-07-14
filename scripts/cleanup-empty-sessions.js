@@ -30,7 +30,7 @@ if (require.main === module) {
     fs.copyFileSync(dbPath, backup);
     console.log(`Backup written: ${backup}`);
   }
-  const db = getDb();
+  const db = getDb(dbPath);
   const plan = planCleanup(db);
   console.log(`Would delete ${plan.delete.length} empty unfinished session(s): [${plan.delete.join(', ')}]`);
   if (!apply) { console.log('\n(dry run) re-run with --apply to delete.'); process.exit(0); }

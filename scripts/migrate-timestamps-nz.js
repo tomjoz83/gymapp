@@ -57,7 +57,7 @@ if (require.main === module) {
     fs.copyFileSync(dbPath, backup);
     console.log(`Backup written: ${backup}`);
   }
-  const db = getDb();
+  const db = getDb(dbPath);
   const plan = planTimestampMigration(db, tz);
   console.log(`Would convert ${plan.convert.length} field(s); skip ${plan.skipped} session(s):`);
   for (const c of plan.convert) console.log(`  session ${c.id} ${c.field}: ${c.from}  ->  ${c.to}`);
