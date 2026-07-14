@@ -70,6 +70,12 @@
     const p = _partsInTZ(tz, instant);
     return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
   }
+  function utcStampToTZ(tz, stamp) {
+    // stamp: "YYYY-MM-DD HH:mm:ss" interpreted as UTC → NZ wall-clock string.
+    if (!stamp || /\d{4}-\d{2}-\d{2} 00:00:00/.test(stamp)) return stamp; // date-only: leave
+    const iso = stamp.replace(' ', 'T') + 'Z';
+    return nowInTZ(tz, new Date(iso));
+  }
   var _DOW = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
   function dayOfWeekOffset(name) {
     return Object.prototype.hasOwnProperty.call(_DOW, name) ? _DOW[name] : null;
@@ -109,5 +115,5 @@
     }
     return cells;
   }
-  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest, todayInTZ, nowInTZ, dayOfWeekOffset, slotDate, dateToSlot, weekGrid };
+  return { rpeToRir, rirToRpe, resolvePrevious, prefillForSet, formatPrevious, nextRestState, tickRest, todayInTZ, nowInTZ, utcStampToTZ, dayOfWeekOffset, slotDate, dateToSlot, weekGrid };
 });
