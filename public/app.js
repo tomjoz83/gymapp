@@ -74,6 +74,7 @@ createApp({
       calendar: [],
       sessionsByDate: {},
       _routinesByDay: null,
+      readonly: false,
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -87,32 +88,34 @@ createApp({
 
     async function buildCalendar() {
       if (!state.activeProgram || !state.activeProgram.start_date) { state.calendar = []; return; }
-      if (!state.anchorDate) state.anchorDate = todayStr();
-      // routinesByDay: fetch week 1 once for the day_of_week → routine name map (same every week).
-      let routinesByDay = state._routinesByDay;
-      if (!routinesByDay) {
-        const w = await api('/api/program/week?number=1');
-        routinesByDay = {};
-        for (const r of (w.routines || [])) routinesByDay[r.day_of_week] = r.name;
-        state._routinesByDay = routinesByDay;
-      }
-      // sessions keyed by date (YYYY-MM-DD) for status dots.
-      const sessions = await api('/api/sessions');
-      const byDate = {};
-      for (const s of sessions) {
-        const d = String(s.started_at).slice(0, 10);
-        // keep the "best" session per date: finished > in-progress; with sets > empty
-        const prev = byDate[d];
-        const score = (s.finished_at ? 2 : 0) + (s.set_count > 0 ? 1 : 0);
-        if (!prev || score > prev._score) byDate[d] = { ...s, _score: score };
-      }
-      state.sessionsByDate = byDate;
-      state.calendar = PTLogic.weekGrid(
-        state.activeProgram.start_date,
-        state.activeProgram.weekCount,
-        state.anchorDate,
-        routinesByDay
-      );
+      try {
+        if (!state.anchorDate) state.anchorDate = todayStr();
+        // routinesByDay: fetch week 1 once for the day_of_week → routine name map (same every week).
+        let routinesByDay = state._routinesByDay;
+        if (!routinesByDay) {
+          const w = await api('/api/program/week?number=1');
+          routinesByDay = {};
+          for (const r of (w.routines || [])) routinesByDay[r.day_of_week] = r.name;
+          state._routinesByDay = routinesByDay;
+        }
+        // sessions keyed by date (YYYY-MM-DD) for status dots.
+        const sessions = await api('/api/sessions');
+        const byDate = {};
+        for (const s of sessions) {
+          const d = String(s.started_at).slice(0, 10);
+          // keep the "best" session per date: finished > in-progress; with sets > empty
+          const prev = byDate[d];
+          const score = (s.finished_at ? 2 : 0) + (s.set_count > 0 ? 1 : 0);
+          if (!prev || score > prev._score) byDate[d] = { ...s, _score: score };
+        }
+        state.sessionsByDate = byDate;
+        state.calendar = PTLogic.weekGrid(
+          state.activeProgram.start_date,
+          state.activeProgram.weekCount,
+          state.anchorDate,
+          routinesByDay
+        );
+      } catch (e) { state.error = e.message || String(e); }
     }
     function cellStatus(cell) {
       const s = state.sessionsByDate[cell.date];
@@ -129,14 +132,75 @@ createApp({
       state.anchorDate = d.toISOString().slice(0, 10);
       buildCalendar();
     }
-    function openDay(cell) { /* implemented in Task 10 */ console.log('openDay', cell); }
+    function routineForCell(cell) {
+      // find the routine object for this cell's week+day from the week payload
+      return (state.week && state.week.routines || []).find((r) => r.name === cell.routineName) || null;
+    }
+    async function loadWeekForCell(cell) {
+      const slot = PTLogic.dateToSlot(state.activeProgram.start_date, state.activeProgram.weekCount, cell.date);
+      if (!slot) return null;
+      state.week = await api(`/api/program/week?number=${slot.weekNumber}`);
+      return routineForCell(cell);
+    }
+    function hydrateFromSession(routine, full, editable) {
+      // Build the workout grid, marking logged sets done; extra target sets appended as blank (editable only).
+      const priorByExercise = {};
+      for (const s of full.sets) (priorByExercise[s.exercise] = priorByExercise[s.exercise] || []).push(s);
+      const exercises = [];
+      for (const rx of routine.exercises) {
+        const logged = (priorByExercise[rx.exercise] || []).sort((a, b) => a.set_number - b.set_number);
+        const sets = [];
+        const target = rx.target_sets || logged.length || 1;
+        for (let i = 1; i <= Math.max(target, logged.length); i++) {
+          const done = logged.find((x) => x.set_number === i);
+          sets.push(done
+            ? { set_number: i, prev: null, weight: done.weight, reps: done.reps, rpe: done.rpe, done: !!done.is_complete, logId: done.id }
+            : { set_number: i, prev: null, weight: null, reps: null, rpe: rx.target_rpe != null ? rx.target_rpe : null, done: false, logId: null });
+        }
+        exercises.push({ name: rx.exercise, rest_seconds: rx.rest_seconds || 90, sets });
+      }
+      state.workout = { exercises, current: 0 };
+      state.readonly = !editable;
+    }
+    async function openDay(cell) {
+      if (!cell.inProgram) { showToast('Rest day'); return; }
+      const routine = await loadWeekForCell(cell);
+      if (!routine) { showToast('No routine'); return; }
+      const sessions = await api('/api/sessions');
+      const slotSession = sessions.find((s) => String(s.started_at).slice(0, 10) === cell.date && s.routine_name === routine.name) || null;
+      if (slotSession && slotSession.finished_at) {
+        const full = await api(`/api/sessions/${slotSession.id}`);
+        state.activeSession = { id: slotSession.id, routine };
+        hydrateFromSession(routine, full, false); // read-only
+        state.view = 'workout';
+        return;
+      }
+      if (slotSession) { // unfinished → resume editable
+        const full = await api(`/api/sessions/${slotSession.id}`);
+        state.activeSession = { id: slotSession.id, routine };
+        hydrateFromSession(routine, full, true);
+        state.view = 'workout';
+        return;
+      }
+      // none → start (idempotent per slot)
+      const resp = await api('/api/sessions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ routineId: routine.id, date: cell.date }),
+      });
+      state.activeSession = { id: resp.id, routine };
+      state.readonly = false;
+      await initWorkout(routine); // existing Phase-3b builder (prefill), now program-scoped (below)
+      state.view = 'workout';
+    }
+    function editReadonly() { state.readonly = false; }
 
     // Fetch prior sessions' full set data ONCE, newest first, excluding the active session.
     async function loadPriorSessions() {
       const result = [];
       try {
         const sessions = await api('/api/sessions'); // most recent first
-        for (const s of sessions) {
+        const scoped = sessions.filter((s) => !state.activeProgram || s.program_id === state.activeProgram.id);
+        for (const s of scoped) {
           if (state.activeSession && s.id === state.activeSession.id) continue;
           const full = await api(`/api/sessions/${s.id}`);
           result.push(full);
@@ -315,6 +379,7 @@ createApp({
       logSet, finishWorkout, leaveWorkout,
       skipRest, addRest,
       pageWeek, openDay, cellStatus, buildCalendar,
+      editReadonly,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },

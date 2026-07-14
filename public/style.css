@@ -55,3 +55,4 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .st-today .cal-dot { background:#58a6ff; }
 .st-missed { opacity:.6; }
 .st-rest { opacity:.45; }
+.ck.static { display:inline-flex; align-items:center; justify-content:center; opacity:.8; }

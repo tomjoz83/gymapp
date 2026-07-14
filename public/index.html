@@ -51,8 +51,9 @@
         <section v-else-if="view === 'workout'">
           <div class="workout-top">
             <button class="btn-back" @click="leaveWorkout">‹ Back</button>
-            <span class="muted">{{ activeSession && activeSession.routine.name }}</span>
-            <button class="btn-finish" @click="finishWorkout">Finish</button>
+            <span class="muted">{{ activeSession && activeSession.routine.name }}<span v-if="readonly"> · read-only</span></span>
+            <button v-if="readonly" class="btn-secondary" @click="editReadonly">Edit</button>
+            <button v-else class="btn-finish" @click="finishWorkout">Finish</button>
           </div>
           <div v-if="workout" class="exercise">
             <div class="ex-progress">
@@ -70,10 +71,13 @@
                 <tr v-for="s in workout.exercises[workout.current].sets" :key="s.set_number" :class="{ done: s.done }">
                   <td>{{ s.set_number }}</td>
                   <td class="prev">{{ fmtPrev(s.prev) }}</td>
-                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done" /></td>
-                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done" /></td>
-                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done" /></td>
-                  <td><button class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button></td>
+                  <td><input class="cell" type="number" inputmode="decimal" v-model.number="s.weight" :disabled="s.done || readonly" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done || readonly" /></td>
+                  <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done || readonly" /></td>
+                  <td>
+                    <span v-if="readonly" class="ck ok static">✓</span>
+                    <button v-else class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
