@@ -46,6 +46,23 @@
               </div>
             </div>
           </div>
+          <div v-if="activeProgram && programDays.length" class="program-ref">
+            <h3 class="program-ref-heading">Program: {{ activeProgram.name }}</h3>
+            <div v-if="!programDayDetail">
+              <div v-for="d in programDays" :key="d.name" class="day-card" @click="openProgramDay(d)">
+                <div class="day-name">{{ d.name }}</div>
+                <div class="muted">{{ d.exercises.length }} exercises ›</div>
+              </div>
+            </div>
+            <div v-else class="program-day-detail">
+              <button class="btn-back" @click="closeProgramDay">‹ Program</button>
+              <h4>{{ programDayDetail.name }}</h4>
+              <div v-for="(e, i) in programDayDetail.exercises" :key="i" class="program-ex-row">
+                <span class="program-ex-name">{{ e.exercise }}</span>
+                <span class="muted">{{ e.target_sets != null ? e.target_sets + ' sets' : '—' }}</span>
+              </div>
+            </div>
+          </div>
         </section>
         <section v-else-if="view === 'progress'">
           <h2>Progress</h2>
