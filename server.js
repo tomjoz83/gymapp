@@ -6,6 +6,8 @@ const express = require('express');
 const { getDb } = require('./db');
 const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise } = require('./store');
 const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress } = require('./read-queries');
+const PTLogic = require('./public/logic.js');
+const APP_TZ = process.env.APP_TZ || 'Pacific/Auckland';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,24 +56,12 @@ app.use('/api', (req, res, next) => {
   res.status(401).json({ error: 'unauthorized' });
 });
 
-// Local "YYYY-MM-DD HH:mm:ss" timestamp (consistent with isoLocal dates).
-function isoLocal(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 function todayIso() {
-  return isoLocal(new Date());
+  return PTLogic.todayInTZ(APP_TZ, new Date());
 }
 
 function nowStamp() {
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  const ss = String(d.getSeconds()).padStart(2, '0');
-  return `${isoLocal(d)} ${hh}:${mm}:${ss}`;
+  return PTLogic.nowInTZ(APP_TZ, new Date());
 }
 
 // ===== SQLite-backed API routes =====
