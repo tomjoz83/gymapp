@@ -52,9 +52,9 @@ test('nowInTZ returns correct NZ wall-clock timestamp for pinned NZST instant', 
 let proc, base, dir; const token = 'tzt';
 before(async () => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'srv-tz-'));
-  base = 'http://localhost:3998';
+  base = 'http://localhost:3997';
   proc = spawn('node', ['server.js'], {
-    env: { ...process.env, DB_PATH: path.join(dir, 't.db'), AUTH_TOKEN: token, PORT: '3998', APP_TZ: 'Pacific/Auckland' },
+    env: { ...process.env, DB_PATH: path.join(dir, 't.db'), AUTH_TOKEN: token, PORT: '3997', APP_TZ: 'Pacific/Auckland' },
     stdio: 'ignore',
   });
   for (let i = 0; i < 50; i++) {
