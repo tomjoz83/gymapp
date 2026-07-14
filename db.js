@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS programs (
   slug TEXT UNIQUE,
   description TEXT,
   active INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  start_date TEXT
 );
 CREATE TABLE IF NOT EXISTS program_weeks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,6 +101,12 @@ function getDb(path) {
         DROP TABLE IF EXISTS program_weeks;
         DROP TABLE IF EXISTS programs;
       `);
+    }
+  }
+  if (hasPrograms) {
+    const cols2 = db.prepare('PRAGMA table_info(programs)').all().map((c) => c.name);
+    if (cols2.includes('slug') && !cols2.includes('start_date')) {
+      db.exec('ALTER TABLE programs ADD COLUMN start_date TEXT');
     }
   }
   db.exec(SCHEMA);
