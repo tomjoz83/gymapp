@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const express = require('express');
 const { getDb } = require('./db');
 const { createSession, logSet, finishSession, updateSetLog, deleteSetLog, recomputePRs, findOrCreateExercise, findOrCreateSessionForSlot, setProgramStartDate } = require('./store');
-const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress } = require('./read-queries');
+const { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, listLoggedExercises } = require('./read-queries');
 const PTLogic = require('./public/logic.js');
 const APP_TZ = process.env.APP_TZ || 'Pacific/Auckland';
 
@@ -141,6 +141,10 @@ app.post('/api/sessions/:id/finish', (req, res) => {
   const result = finishSession(getDb(), Number(req.params.id), nowStamp());
   if (!result) return res.status(404).json({ error: 'session not found' });
   res.json(result);
+});
+
+app.get('/api/exercises', (req, res) => {
+  res.json(listLoggedExercises(getDb()));
 });
 
 app.get('/api/progress/:exercise', (req, res) => {

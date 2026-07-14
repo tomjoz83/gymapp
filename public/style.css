@@ -56,3 +56,4 @@ body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui
 .st-missed { opacity:.6; }
 .st-rest { opacity:.45; }
 .ck.static { display:inline-flex; align-items:center; justify-content:center; opacity:.8; }
+.prog-detail .spark { width:100%; height:60px; display:block; margin:8px 0; }

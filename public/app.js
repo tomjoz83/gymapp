@@ -75,6 +75,7 @@ createApp({
       sessionsByDate: {},
       _routinesByDay: null,
       readonly: false,
+      exercises: [], progressDetail: null,
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -371,6 +372,29 @@ createApp({
       localStorage.setItem('pt_effort_scale', state.effortScale);
     }
 
+    async function loadExercises() {
+      try { state.exercises = await api('/api/exercises'); } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+    async function openProgress(name) {
+      try {
+        const p = await api(`/api/progress/${encodeURIComponent(name)}`);
+        p.history = (p.history || []).filter((h) => h.est_1rm > 0);
+        if (p.pr && !(p.pr.best_est_1rm > 0)) p.pr = null;
+        state.progressDetail = { exercise: name, ...p };
+      } catch (e) { if (!e.unauthorized) state.error = e.message; }
+    }
+    function progressSparkline(history) {
+      const vals = (history || []).map((h) => h.est_1rm);
+      if (vals.length < 2) return '';
+      const max = Math.max(...vals), min = Math.min(...vals), span = max - min || 1;
+      return vals.map((v, i) => {
+        const x = (i / (vals.length - 1)) * 280;
+        const y = 60 - ((v - min) / span) * 56 - 2;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+    }
+    function closeProgress() { state.progressDetail = null; }
+
     if (state.unlocked) loadActiveProgram();
 
     return {
@@ -380,6 +404,7 @@ createApp({
       skipRest, addRest,
       pageWeek, openDay, cellStatus, buildCalendar,
       editReadonly,
+      loadExercises, openProgress, closeProgress, progressSparkline,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },

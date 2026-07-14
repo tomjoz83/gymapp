@@ -96,4 +96,18 @@ function findSessionForSlot(db, { routineId, date }) {
   return row || null;
 }
 
-module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot };
+function listLoggedExercises(db) {
+  return db.prepare(
+    `SELECT e.name AS name,
+            COUNT(DISTINCT sl.session_id) AS session_count,
+            MAX(substr(ws.started_at,1,10)) AS last_date
+       FROM set_logs sl
+       JOIN exercises e ON e.id = sl.exercise_id
+       JOIN workout_sessions ws ON ws.id = sl.session_id
+      WHERE sl.is_warmup = 0 AND sl.weight IS NOT NULL
+      GROUP BY e.id
+      ORDER BY last_date DESC, e.name ASC`
+  ).all();
+}
+
+module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot, listLoggedExercises };

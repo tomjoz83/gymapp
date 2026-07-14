@@ -47,7 +47,29 @@
             </div>
           </div>
         </section>
-        <section v-else-if="view === 'progress'"><h2>Progress</h2><p class="muted">Coming in 3c.</p></section>
+        <section v-else-if="view === 'progress'">
+          <h2>Progress</h2>
+          <div v-if="!progressDetail">
+            <p v-if="!exercises.length" class="muted">No logged exercises yet.</p>
+            <div v-for="e in exercises" :key="e.name" class="day-card" @click="openProgress(e.name)">
+              <div class="day-name">{{ e.name }}</div>
+              <div class="muted">{{ e.session_count }} sessions · last {{ e.last_date }}</div>
+            </div>
+          </div>
+          <div v-else class="prog-detail">
+            <button class="btn-back" @click="closeProgress">‹ Exercises</button>
+            <h3>{{ progressDetail.exercise }}</h3>
+            <svg v-if="progressDetail.history.length >= 2" class="spark" viewBox="0 0 280 60" preserveAspectRatio="none">
+              <polyline :points="progressSparkline(progressDetail.history)" fill="none" stroke="#58a6ff" stroke-width="2" />
+            </svg>
+            <p class="muted" v-if="progressDetail.pr">PR: {{ progressDetail.pr.best_weight }}kg · est 1RM {{ Math.round(progressDetail.pr.best_est_1rm) }}kg</p>
+            <table class="set-grid"><thead><tr><th>Date</th><th>Top</th><th>est 1RM</th><th>Vol</th></tr></thead>
+              <tbody><tr v-for="(h,i) in progressDetail.history.slice().reverse()" :key="i">
+                <td>{{ h.date }}</td><td>{{ h.top_weight }}</td><td>{{ Math.round(h.est_1rm) }}</td><td>{{ Math.round(h.volume) }}</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </section>
         <section v-else-if="view === 'workout'">
           <div class="workout-top">
             <button class="btn-back" @click="leaveWorkout">‹ Back</button>
@@ -75,7 +97,8 @@
                   <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.reps" :disabled="s.done || readonly" /></td>
                   <td><input class="cell" type="number" inputmode="numeric" v-model.number="s.rpe" :disabled="s.done || readonly" /></td>
                   <td>
-                    <span v-if="readonly" class="ck ok static">✓</span>
+                    <span v-if="readonly && s.done" class="ck ok static">✓</span>
+                    <span v-else-if="readonly" class="ck static muted">·</span>
                     <button v-else class="ck" :class="{ ok: s.done }" @click="logSet(workout.exercises[workout.current], s)" :disabled="s.done || s.weight === null || s.weight === '' || s.reps === null || s.reps === ''">✓</button>
                   </td>
                 </tr>
@@ -109,7 +132,7 @@
       </main>
       <nav class="tabbar">
         <button :class="{ active: view === 'home' }" @click="view = 'home'"><span class="ic">🏠</span>Home</button>
-        <button :class="{ active: view === 'progress' }" @click="view = 'progress'"><span class="ic">📈</span>Progress</button>
+        <button :class="{ active: view === 'progress' }" @click="view = 'progress'; loadExercises()"><span class="ic">📈</span>Progress</button>
         <button :class="{ active: view === 'settings' }" @click="view = 'settings'"><span class="ic">⚙️</span>Settings</button>
       </nav>
     </div>
