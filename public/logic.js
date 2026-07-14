@@ -72,7 +72,9 @@
   }
   function utcStampToTZ(tz, stamp) {
     // stamp: "YYYY-MM-DD HH:mm:ss" interpreted as UTC → NZ wall-clock string.
-    if (!stamp || /\d{4}-\d{2}-\d{2} 00:00:00/.test(stamp)) return stamp; // date-only: leave
+    // Midnight/date-only stamps are legacy sessions recorded without a time component;
+    // converting them would shift the date itself, so leave them as-is.
+    if (!stamp || /^\d{4}-\d{2}-\d{2} 00:00:00$/.test(stamp)) return stamp;
     const iso = stamp.replace(' ', 'T') + 'Z';
     return nowInTZ(tz, new Date(iso));
   }

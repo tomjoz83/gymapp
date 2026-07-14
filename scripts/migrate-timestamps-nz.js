@@ -4,7 +4,9 @@ const { getDb } = require('../db');
 const L = require('../public/logic.js');
 
 function planTimestampMigration(db, tz) {
-  const rows = db.prepare('SELECT id, started_at, finished_at FROM workout_sessions').all();
+  // Ensure the sentinel column exists (no-op if already present).
+  _ensureMigratedColumn(db);
+  const rows = db.prepare('SELECT id, started_at, finished_at FROM workout_sessions WHERE tz_migrated IS NOT 1').all();
   const convert = [];
   let skipped = 0;
   for (const r of rows) {
@@ -21,16 +23,29 @@ function planTimestampMigration(db, tz) {
 }
 
 function applyTimestampMigration(db, plan) {
+  _ensureMigratedColumn(db);
   db.exec('BEGIN');
   try {
     const upd = {
       started_at: db.prepare('UPDATE workout_sessions SET started_at = ? WHERE id = ?'),
       finished_at: db.prepare('UPDATE workout_sessions SET finished_at = ? WHERE id = ?'),
     };
-    for (const c of plan.convert) upd[c.field].run(c.to, c.id);
+    const mark = db.prepare('UPDATE workout_sessions SET tz_migrated = 1 WHERE id = ?');
+    // Collect unique ids that actually had at least one conversion.
+    const changedIds = new Set();
+    for (const c of plan.convert) { upd[c.field].run(c.to, c.id); changedIds.add(c.id); }
+    for (const id of changedIds) mark.run(id);
     db.exec('COMMIT');
   } catch (e) { db.exec('ROLLBACK'); throw e; }
   return plan.convert.length;
+}
+
+/** Add tz_migrated INTEGER column if the table predates it (idempotent). */
+function _ensureMigratedColumn(db) {
+  const cols = db.prepare('PRAGMA table_info(workout_sessions)').all().map((c) => c.name);
+  if (!cols.includes('tz_migrated')) {
+    db.exec('ALTER TABLE workout_sessions ADD COLUMN tz_migrated INTEGER');
+  }
 }
 
 if (require.main === module) {
