@@ -294,14 +294,13 @@
     // -------------------------------------------------------------------------
     async function finishSession(id, finishedAt) {
       var stamp = finishedAt || _PTLogic.nowInTZ('Pacific/Auckland', new Date());
+      // exec.run() MUST return { lastId, changes } — changes is required here.
+      // The Capacitor SQLite plugin's run/execute also exposes changes, so this
+      // contract is portable across all supported exec adapters.
       var info = await exec.run(
         'UPDATE workout_sessions SET finished_at = ? WHERE id = ?', [stamp, id]
       );
-      if (info.lastId === 0) {
-        // changes check: re-read to confirm the row existed
-        var check = await exec.get('SELECT id FROM workout_sessions WHERE id = ?', [id]);
-        if (!check) return null;
-      }
+      if (info.changes === 0) return null;
       return { id: id, finished_at: stamp };
     }
 
@@ -380,7 +379,7 @@
         [weight, reps, rpe, isWarmup, isComplete, id]
       );
       await recomputePRs(existing.exercise_id);
-      return exec.get('SELECT * FROM set_logs WHERE id = ?', [id]);
+      return await exec.get('SELECT * FROM set_logs WHERE id = ?', [id]);
     }
 
     // -------------------------------------------------------------------------
