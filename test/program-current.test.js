@@ -30,7 +30,7 @@ test('getCurrentProgramJson returns importProgram-shaped object', () => {
   assert.strictEqual(json.weeks[0].routines[0].exercises[0].target_sets, 4);
   assert.strictEqual(json.weeks[0].routines[0].exercises[0].target_reps, 8);
   assert.strictEqual(json.weeks[0].routines[0].exercises[0].target_rpe, 7);
-  assert.strictEqual(json.weeks[0].routines[0].exercises[0].target_reps, 8);
+  assert.strictEqual(json.weeks[0].routines[0].exercises[0].target_weight, undefined); // absent, not 0
   assert.strictEqual(json.weeks[0].routines[0].exercises[0].rest_seconds, 120);
   closeDb();
   fs.rmSync(DB1, { force: true });
