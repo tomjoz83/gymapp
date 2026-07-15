@@ -5,7 +5,7 @@
 //
 // createLocalDb(exec) returns an object whose methods mirror the web layer
 // (read-queries.js + store.js) but use an injected async exec adapter:
-//   exec.run(sql, params) → { lastId }
+//   exec.run(sql, params) → { lastId, changes }  (changes required for finishSession/delete null-checks)
 //   exec.get(sql, params) → row | undefined
 //   exec.all(sql, params) → rows[]
 //   exec.exec(sql)
