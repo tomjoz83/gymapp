@@ -140,7 +140,7 @@ async function api(url, options = {}) {
 
   // GET /api/sessions/:id
   const mSession = path.match(/^\/api\/sessions\/(\d+)$/);
-  if (mSession) return localDb.getSession(Number(mSession[1]));
+  if (mSession && method === 'GET') return localDb.getSession(Number(mSession[1]));
 
   // POST /api/sessions/:id/sets
   const mSets = path.match(/^\/api\/sessions\/(\d+)\/sets$/);
@@ -231,6 +231,9 @@ async function mountApp() {
       programDays: [], programDayDetail: null,
       // Sync UI (native only)
       syncDateInput: '',
+      // VPS token input — one-time entry on device; persisted to localStorage so
+      // subsequent syncs reuse it without re-entry. Shown only when isNative.
+      syncTokenInput: localStorage.getItem('pt_token') || '',
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -578,6 +581,11 @@ async function mountApp() {
         state.error = 'Enter a valid start date (YYYY-MM-DD)';
         return;
       }
+      // The passphrase screen is removed on device, so the sync fetch has no token
+      // unless the user supplies one here (persisted for future syncs).
+      const tok = (state.syncTokenInput || '').trim();
+      if (tok) { authToken = tok; localStorage.setItem('pt_token', tok); }
+      if (!authToken) { state.error = 'Enter your VPS token to sync'; return; }
       state.error = '';
       try {
         const res = await fetch(VPS_BASE + '/api/program/current', {
@@ -588,10 +596,11 @@ async function mountApp() {
         // importProgram is idempotent on slug — safe to call repeatedly.
         const programId = await localDb.importProgram(json);
         await localDb.setProgramStartDate(programId, d);
-        // Mark the newly imported program as active (importProgram sets active=1
-        // when program.active is true; if it was false in the JSON, force it).
         state._routinesByDay = null; // invalidate cached week map
         await loadActiveProgram();
+        // getCurrentProgramJson serves active:true, so import should activate it;
+        // guard against a bad payload so we don't toast a misleading success.
+        if (!state.activeProgram) { state.error = 'Synced but no active program — check the VPS payload'; return; }
         showToast(`✓ Program synced, starts ${d}`);
       } catch (e) {
         state.error = 'Sync failed: ' + (e.message || String(e));

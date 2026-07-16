@@ -159,6 +159,9 @@
             <label class="row">Start date
               <input type="date" v-model="syncDateInput" class="date-input" placeholder="YYYY-MM-DD" />
             </label>
+            <label class="row">VPS token
+              <input type="password" v-model="syncTokenInput" class="date-input" placeholder="one-time, saved on device" />
+            </label>
             <button class="btn-primary" @click="syncProgram">Sync program</button>
           </div>
           <button v-if="!isNative" class="btn-secondary" @click="lock">Lock app</button>
