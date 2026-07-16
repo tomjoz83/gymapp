@@ -110,4 +110,31 @@ function listLoggedExercises(db) {
   ).all();
 }
 
-module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot, listLoggedExercises };
+function getCurrentProgramJson(db) {
+  const p = db.prepare('SELECT id, name, slug, description FROM programs WHERE active = 1').get();
+  if (!p) return null;
+  const weeks = db.prepare('SELECT id, week_number, label FROM program_weeks WHERE program_id = ? ORDER BY week_number').all(p.id);
+  return {
+    slug: p.slug, name: p.name, description: p.description || undefined, active: true,
+    weeks: weeks.map((w) => ({
+      week_number: w.week_number, label: w.label || undefined,
+      routines: db.prepare('SELECT id, name, day_of_week FROM routines WHERE program_week_id = ? ORDER BY order_index').all(w.id).map((r) => ({
+        name: r.name, day_of_week: r.day_of_week || undefined,
+        exercises: db.prepare(
+          `SELECT e.name AS exercise, rx.target_sets, rx.target_reps, rx.target_weight, rx.target_rpe, rx.rest_seconds
+             FROM routine_exercises rx JOIN exercises e ON e.id = rx.exercise_id
+            WHERE rx.routine_id = ? ORDER BY rx.order_index`
+        ).all(r.id).map((e) => ({
+          exercise: e.exercise,
+          ...(e.target_sets != null ? { target_sets: e.target_sets } : {}),
+          ...(e.target_reps != null ? { target_reps: e.target_reps } : {}),
+          ...(e.target_weight != null ? { target_weight: e.target_weight } : {}),
+          ...(e.target_rpe != null ? { target_rpe: e.target_rpe } : {}),
+          ...(e.rest_seconds != null ? { rest_seconds: e.rest_seconds } : {}),
+        })),
+      })),
+    })),
+  };
+}
+
+module.exports = { getActiveProgram, getProgramWeek, listSessions, getSession, getProgress, findSessionForSlot, listLoggedExercises, getCurrentProgramJson };

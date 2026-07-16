@@ -1,5 +1,12 @@
 'use strict';
 
+// ---------------------------------------------------------------------------
+// VPS configuration — used ONLY by syncProgram() on the native app.
+// Must be the HTTPS URL of your VPS (iOS ATS requires HTTPS).
+// Replace <your-vps-host> with the actual hostname before building for device.
+// ---------------------------------------------------------------------------
+const VPS_BASE = 'https://<your-vps-host>';
+
 const { createApp, reactive, toRefs } = Vue;
 
 // Shared secret sent with every API call; the server rejects everything else
@@ -7,7 +14,71 @@ const { createApp, reactive, toRefs } = Vue;
 let authToken = localStorage.getItem('pt_token') || '';
 let onUnauthorized = () => {};
 
-async function api(url, options = {}) {
+// ---------------------------------------------------------------------------
+// On-device SQLite via @capacitor-community/sqlite.
+// localDb is set during initLocalDb(); null means "use HTTP fallback".
+// isNative is true iff the SQLite layer is active (running inside Capacitor).
+// ---------------------------------------------------------------------------
+let localDb = null;
+let isNative = false;
+
+async function initLocalDb() {
+  try {
+    // @capacitor-community/sqlite is loaded by Capacitor at runtime on device.
+    // In a plain desktop browser this property simply doesn't exist → fall back.
+    const cap = window.Capacitor;
+    if (!cap || !cap.Plugins || !cap.Plugins.CapacitorSQLite) return;
+
+    const sqlite = cap.Plugins.CapacitorSQLite;
+
+    // Open (or create) the app database.
+    await sqlite.open({ database: 'gymapp', encrypted: false, mode: 'no-encryption' });
+
+    // Build the exec adapter over the plugin's Promise-based API.
+    const exec = {
+      async run(sql, params) {
+        const r = await sqlite.run({ statement: sql, values: params || [] });
+        // r.changes is the plugin's changes object: { changes, lastId }
+        return { lastId: r.changes.lastId, changes: r.changes.changes };
+      },
+      async get(sql, params) {
+        const r = await sqlite.query({ statement: sql, values: params || [] });
+        return (r.values && r.values.length > 0) ? r.values[0] : undefined;
+      },
+      async all(sql, params) {
+        const r = await sqlite.query({ statement: sql, values: params || [] });
+        return r.values || [];
+      },
+      async exec(sql) {
+        await sqlite.execute({ statements: sql });
+      },
+      async begin() {
+        await sqlite.run({ statement: 'BEGIN', values: [] });
+      },
+      async commit() {
+        await sqlite.run({ statement: 'COMMIT', values: [] });
+      },
+      async rollback() {
+        await sqlite.run({ statement: 'ROLLBACK', values: [] });
+      },
+    };
+
+    localDb = LocalDb.createLocalDb(exec);
+    await localDb.initSchema();
+    isNative = true;
+  } catch (e) {
+    // Plugin unavailable or init failed → stay on HTTP fallback.
+    console.warn('[gymapp] SQLite init skipped, using HTTP fallback:', e && e.message);
+    localDb = null;
+    isNative = false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// apiHttpFallback — the original fetch-based api(), unchanged.
+// Used when running in a plain desktop browser (localDb === null).
+// ---------------------------------------------------------------------------
+async function apiHttpFallback(url, options = {}) {
   options.headers = {
     ...(options.headers || {}),
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
@@ -37,6 +108,84 @@ async function api(url, options = {}) {
   return data;
 }
 
+// ---------------------------------------------------------------------------
+// api() — unified entry point.
+// On native (localDb present): routes to local SQLite layer; no fetch, no token.
+// On browser (localDb null): delegates to apiHttpFallback() exactly as before.
+// ---------------------------------------------------------------------------
+async function api(url, options = {}) {
+  if (!localDb) return apiHttpFallback(url, options);
+
+  const method = (options.method || 'GET').toUpperCase();
+  const body = options.body ? JSON.parse(options.body) : null;
+  const u = new URL(url, 'http://x');
+  const path = u.pathname;
+  const q = u.searchParams;
+
+  // GET /api/active-program
+  if (path === '/api/active-program') return localDb.getActiveProgram();
+
+  // GET /api/program/week?number=N
+  if (path === '/api/program/week') return localDb.getProgramWeek(Number(q.get('number')) || 1);
+
+  // GET /api/sessions
+  if (path === '/api/sessions' && method === 'GET') return localDb.listSessions();
+
+  // POST /api/sessions
+  if (path === '/api/sessions' && method === 'POST') {
+    return (body && body.date && body.routineId != null)
+      ? localDb.findOrCreateSessionForSlot({ routineId: body.routineId, date: body.date })
+      : localDb.createSession({ routineId: body ? body.routineId : null });
+  }
+
+  // GET /api/sessions/:id
+  const mSession = path.match(/^\/api\/sessions\/(\d+)$/);
+  if (mSession && method === 'GET') return localDb.getSession(Number(mSession[1]));
+
+  // POST /api/sessions/:id/sets
+  const mSets = path.match(/^\/api\/sessions\/(\d+)\/sets$/);
+  if (mSets && method === 'POST') {
+    const newId = await localDb.logSet({
+      sessionId: Number(mSets[1]),
+      exerciseName: body.exerciseName,
+      setNumber: body.setNumber,
+      weight: body.weight,
+      reps: body.reps,
+      rpe: body.rpe,
+    });
+    // Recompute PRs for this exercise (mirrors the web server route).
+    try {
+      const ex = await localDb.findOrCreateExercise(body.exerciseName);
+      await localDb.recomputePRs(ex);
+    } catch (_) { /* best-effort */ }
+    return { id: newId };
+  }
+
+  // POST /api/sessions/:id/finish
+  const mFinish = path.match(/^\/api\/sessions\/(\d+)\/finish$/);
+  if (mFinish && method === 'POST') return localDb.finishSession(Number(mFinish[1]));
+
+  // PUT /api/sets/:id
+  const mSet = path.match(/^\/api\/sets\/(\d+)$/);
+  if (mSet && method === 'PUT') return localDb.updateSetLog(Number(mSet[1]), body);
+
+  // DELETE /api/sets/:id
+  if (mSet && method === 'DELETE') return localDb.deleteSetLog(Number(mSet[1]));
+
+  // PUT /api/program/:id/start-date
+  const mStartDate = path.match(/^\/api\/program\/(\d+)\/start-date$/);
+  if (mStartDate) return localDb.setProgramStartDate(Number(mStartDate[1]), body.start_date);
+
+  // GET /api/exercises
+  if (path === '/api/exercises') return localDb.listLoggedExercises();
+
+  // GET /api/progress/:exercise
+  const mProgress = path.match(/^\/api\/progress\/(.+)$/);
+  if (mProgress) return localDb.getProgress(decodeURIComponent(mProgress[1]));
+
+  throw new Error('Unrouted local api: ' + method + ' ' + path);
+}
+
 function formatElapsed(totalSeconds) {
   const sec = Math.max(0, Math.floor(totalSeconds || 0));
   const h = String(Math.floor(sec / 3600)).padStart(2, '0');
@@ -46,13 +195,22 @@ function formatElapsed(totalSeconds) {
 }
 
 
-createApp({
+// ---------------------------------------------------------------------------
+// Boot: await SQLite init BEFORE mounting Vue so isNative/localDb are set
+// when setup() reads them synchronously.
+// ---------------------------------------------------------------------------
+async function mountApp() {
+  await initLocalDb();
+
+  createApp({
   setup() {
     const APP_TZ = 'Pacific/Auckland';
     function todayStr() { return PTLogic.todayInTZ(APP_TZ, new Date()); }
 
     const state = reactive({
-      unlocked: !!authToken,
+      // On native: start unlocked immediately (no passphrase gate on device).
+      // On browser: honour the stored token as before.
+      unlocked: isNative || !!authToken,
       tokenInput: '',
       error: '',
       view: 'home',
@@ -71,6 +229,11 @@ createApp({
       exercises: [], progressDetail: null,
       startDateInput: '',
       programDays: [], programDayDetail: null,
+      // Sync UI (native only)
+      syncDateInput: '',
+      // VPS token input — one-time entry on device; persisted to localStorage so
+      // subsequent syncs reuse it without re-entry. Shown only when isNative.
+      syncTokenInput: localStorage.getItem('pt_token') || '',
     });
 
     onUnauthorized = () => { state.unlocked = false; };
@@ -332,7 +495,7 @@ createApp({
     async function loadActiveProgram() {
       try {
         state.activeProgram = await api('/api/active-program');
-        state.startDateInput = state.activeProgram.start_date || '';
+        state.startDateInput = state.activeProgram ? (state.activeProgram.start_date || '') : '';
         await buildCalendar();
         await loadProgramDays();
       } catch (e) {
@@ -407,10 +570,53 @@ createApp({
     }
     function closeProgress() { state.progressDetail = null; }
 
+    // -----------------------------------------------------------------------
+    // syncProgram — fetch the active program from the VPS and import it into
+    // the local SQLite DB, then set the chosen start date.
+    // Native-only: only shown in UI when isNative is true.
+    // -----------------------------------------------------------------------
+    async function syncProgram() {
+      const d = state.syncDateInput;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+        state.error = 'Enter a valid start date (YYYY-MM-DD)';
+        return;
+      }
+      // The passphrase screen is removed on device, so the sync fetch has no token
+      // unless the user supplies one here (persisted for future syncs).
+      const tok = (state.syncTokenInput || '').trim();
+      if (tok) { authToken = tok; localStorage.setItem('pt_token', tok); }
+      if (!authToken) { state.error = 'Enter your VPS token to sync'; return; }
+      state.error = '';
+      try {
+        const res = await fetch(VPS_BASE + '/api/program/current', {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+        });
+        if (!res.ok) throw new Error(`VPS responded ${res.status}`);
+        const json = await res.json();
+        // importProgram is idempotent on slug — safe to call repeatedly.
+        const programId = await localDb.importProgram(json);
+        await localDb.setProgramStartDate(programId, d);
+        state._routinesByDay = null; // invalidate cached week map
+        await loadActiveProgram();
+        // getCurrentProgramJson serves active:true, so import should activate it;
+        // guard against a bad payload so we don't toast a misleading success.
+        if (!state.activeProgram) { state.error = 'Synced but no active program — check the VPS payload'; return; }
+        showToast(`✓ Program synced, starts ${d}`);
+      } catch (e) {
+        state.error = 'Sync failed: ' + (e.message || String(e));
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // Boot
+    // -----------------------------------------------------------------------
+    // On native: skip passphrase, go straight to home.
+    // On browser: honour token as before.
     if (state.unlocked) loadActiveProgram();
 
     return {
       ...toRefs(state),
+      isNative,
       unlock, lock, saveEffortScale, saveStartDate,
       logSet, finishWorkout, leaveWorkout,
       skipRest, addRest,
@@ -418,7 +624,11 @@ createApp({
       editReadonly,
       loadExercises, openProgress, closeProgress, progressSparkline,
       openProgramDay, closeProgramDay,
+      syncProgram,
       fmtPrev: (prev) => PTLogic.formatPrevious(prev, state.effortScale),
     };
   },
-}).mount('#app');
+  }).mount('#app');
+}
+
+mountApp();
