@@ -14,6 +14,7 @@
        Without defer these head scripts run before <body>, so mount('#app') finds nothing. -->
   <script defer src="vendor/vue.global.prod.js"></script>
   <script defer src="logic.js"></script>
+  <script defer src="local-db.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -29,7 +30,7 @@
       <main class="view">
         <section v-if="view === 'home'">
           <h2>This Week</h2>
-          <p v-if="!activeProgram" class="muted">No active program. Load one via the program loader.</p>
+          <p v-if="!activeProgram" class="muted">{{ isNative ? 'No program yet — go to Settings to sync one from your server.' : 'No active program. Load one via the program loader.' }}</p>
           <p v-else-if="!activeProgram.start_date" class="muted">Set a start date for {{ activeProgram.name }} in Settings to see your calendar.</p>
           <div v-else>
             <div class="cal-nav">
@@ -152,7 +153,15 @@
             </label>
             <button class="btn-primary" @click="saveStartDate">Save start date</button>
           </div>
-          <button class="btn-secondary" @click="lock">Lock app</button>
+          <div v-if="isNative" class="setting-group">
+            <h3 class="setting-heading">Sync program from VPS</h3>
+            <p class="muted setting-hint">Downloads the current program from your server and sets its start date.</p>
+            <label class="row">Start date
+              <input type="date" v-model="syncDateInput" class="date-input" placeholder="YYYY-MM-DD" />
+            </label>
+            <button class="btn-primary" @click="syncProgram">Sync program</button>
+          </div>
+          <button v-if="!isNative" class="btn-secondary" @click="lock">Lock app</button>
         </section>
       </main>
       <nav class="tabbar">
